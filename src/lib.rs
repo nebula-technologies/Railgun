@@ -1,3 +1,7 @@
+#[macro_use]
+extern crate async_trait;
+
+mod async_map;
 mod map_iterator;
 mod merge;
 mod tap;

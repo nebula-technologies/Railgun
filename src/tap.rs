@@ -2,12 +2,22 @@ use std::clone::Clone;
 use std::marker::Send;
 use std::thread;
 
+pub trait TapRef<T, E> {
+    fn tap_ref<F: FnOnce(&T)>(self, op: F) -> Result<T, E>;
+}
+
 pub trait Tap<T, E> {
+    fn tap<F: FnOnce(T)>(self, op: F) -> Result<T, E>;
+}
+pub trait TapClone<T, E> {
     fn tap<F: FnOnce(T)>(self, op: F) -> Result<T, E>;
 }
 
 pub trait TapErr<T, E> {
     fn tap_err<F: FnOnce(E)>(self, op: F) -> Result<T, E>;
+}
+pub trait TapErrRef<T, E> {
+    fn tap_err_ref<F: FnOnce(&E)>(self, op: F) -> Result<T, E>;
 }
 
 pub trait ThreadTap<T, E> {
@@ -17,13 +27,19 @@ pub trait ThreadTapErr<T, E> {
     fn thread_tap_err<F: 'static + FnOnce(E) + Send>(self, op: F) -> Result<T, E>;
 }
 
-impl<T: std::clone::Clone, E> Tap<T, E> for Result<T, E> {
+impl<T, E> TapRef<T, E> for Result<T, E> {
+    fn tap_ref<F: FnOnce(&T)>(self, op: F) -> Result<T, E> {
+        if let Ok(ref ok) = self {
+            op(&ok);
+        }
+        self
+    }
+}
+
+impl<T: Clone, E> TapClone<T, E> for Result<T, E> {
     fn tap<F: FnOnce(T)>(self, op: F) -> Result<T, E> {
-        match self {
-            Ok(ref ok) => {
-                op(ok.clone());
-            }
-            _ => {}
+        if let Ok(ref ok) = self {
+            op(ok.clone());
         }
         self
     }
@@ -31,11 +47,17 @@ impl<T: std::clone::Clone, E> Tap<T, E> for Result<T, E> {
 
 impl<T, E: std::clone::Clone> TapErr<T, E> for Result<T, E> {
     fn tap_err<F: FnOnce(E)>(self, op: F) -> Result<T, E> {
-        match self {
-            Err(ref err) => {
-                op(err.clone());
-            }
-            _ => {}
+        if let Err(ref err) = self {
+            op(err.clone());
+        }
+        self
+    }
+}
+
+impl<T, E> TapErrRef<T, E> for Result<T, E> {
+    fn tap_err_ref<F: FnOnce(&E)>(self, op: F) -> Result<T, E> {
+        if let Err(ref err) = self {
+            op(err);
         }
         self
     }
