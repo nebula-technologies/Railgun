@@ -2,7 +2,6 @@
 extern crate async_trait;
 
 mod blocking_result;
-mod future;
 mod map_iterator;
 mod merge;
 mod tap;
