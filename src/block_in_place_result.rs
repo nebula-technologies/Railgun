@@ -233,7 +233,7 @@ use std::hint;
 // Type implementation
 /////////////////////////////////////////////////////////////////////////////
 
-pub trait BlockingResult<T, E> {
+pub trait BlockInPlaceResult<T, E> {
     /////////////////////////////////////////////////////////////////////////
     // Adapter for each variant
     /////////////////////////////////////////////////////////////////////////
@@ -557,7 +557,7 @@ pub trait BlockingResult<T, E> {
     unsafe fn unwrap_err_unchecked(self) -> E;
 }
 
-impl<T, E, L> BlockingResult<T, E> for L
+impl<T, E, L> BlockInPlaceResult<T, E> for L
 where
     L: Future<Output = Result<T, E>>,
 {
