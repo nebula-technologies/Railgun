@@ -454,12 +454,7 @@ impl<T, E> AsyncResult<T, E> {
         }
     }
 
-    pub async fn async_merge<
-        T1,
-        U,
-        FO: Future<Output = AsyncResult<U, E>>,
-        F: FnOnce(T, T1) -> FO,
-    >(
+    pub async fn merge<T1, U, FO: Future<Output = AsyncResult<U, E>>, F: FnOnce(T, T1) -> FO>(
         self,
         res1: AsyncResult<T1, E>,
         op: F,
@@ -472,7 +467,7 @@ impl<T, E> AsyncResult<T, E> {
         }
     }
 
-    pub async fn async_merge2<
+    pub async fn merge2<
         T1,
         T2,
         U,
@@ -492,7 +487,7 @@ impl<T, E> AsyncResult<T, E> {
         .await
     }
 
-    pub async fn async_merge3<
+    pub async fn merge3<
         T1,
         T2,
         T3,
@@ -516,7 +511,7 @@ impl<T, E> AsyncResult<T, E> {
         .await
     }
 
-    pub async fn async_merge4<
+    pub async fn merge4<
         T1,
         T2,
         T3,
