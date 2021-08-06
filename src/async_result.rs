@@ -479,9 +479,9 @@ impl<T, E> AsyncResult<T, E> {
         res2: AsyncResult<T2, E>,
         op: F,
     ) -> AsyncResult<U, E> {
-        self.async_merge(res1, |t, t1| async {
+        self.merge(res1, |t, t1| async {
             Ok(t)
-                .async_merge(res2, |t, t2| async { op(t, t1, t2).await })
+                .merge(res2, |t, t2| async { op(t, t1, t2).await })
                 .await
         })
         .await
@@ -501,10 +501,10 @@ impl<T, E> AsyncResult<T, E> {
         res3: AsyncResult<T3, E>,
         op: F,
     ) -> AsyncResult<U, E> {
-        self.async_merge(res1, |t, t1| async {
+        self.merge(res1, |t, t1| async {
             Ok(t)
-                .async_merge(res2, |t, t2| async {
-                    Ok(t).async_merge(res3, |t, t3| op(t, t1, t2, t3)).await
+                .merge(res2, |t, t2| async {
+                    Ok(t).merge(res3, |t, t3| op(t, t1, t2, t3)).await
                 })
                 .await
         })
@@ -527,12 +527,12 @@ impl<T, E> AsyncResult<T, E> {
         res4: AsyncResult<T4, E>,
         op: F,
     ) -> AsyncResult<U, E> {
-        self.async_merge(res1, |t, t1| async {
+        self.merge(res1, |t, t1| async {
             Ok(t)
-                .async_merge(res2, |t, t2| async {
+                .merge(res2, |t, t2| async {
                     Ok(t)
-                        .async_merge(res3, |t, t3| async {
-                            Ok(t).async_merge(res4, |t, t4| op(t, t1, t2, t3, t4)).await
+                        .merge(res3, |t, t3| async {
+                            Ok(t).merge(res4, |t, t4| op(t, t1, t2, t3, t4)).await
                         })
                         .await
                 })
