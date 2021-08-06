@@ -1,3 +1,4 @@
+use crate::Merge;
 use core::hint;
 use std::future::Future;
 use AsyncResult::{Err, Ok};
@@ -451,6 +452,93 @@ impl<T, E> AsyncResult<T, E> {
             Ok(_) => unsafe { hint::unreachable_unchecked() },
             Err(e) => e,
         }
+    }
+
+    pub async fn merge<T1, U, FO: Future<Output = AsyncResult<U, E>>, F: FnOnce(T, T1) -> FO>(
+        self,
+        res1: AsyncResult<T1, E>,
+        op: F,
+    ) -> AsyncResult<U, E> {
+        match (self, res1) {
+            (Ok(t), Ok(t1)) => op(t, t1).await,
+            (Err(e), Ok(_t1)) => Err(e),
+            (Ok(_t), Err(e1)) => Err(e1),
+            (Err(e), Err(_e1)) => Err(e),
+        }
+    }
+
+    pub async fn merge2<
+        T1,
+        T2,
+        U,
+        FO: Future<Output = AsyncResult<U, E>>,
+        F: FnOnce(T, T1, T2) -> FO,
+    >(
+        self,
+        res1: AsyncResult<T1, E>,
+        res2: AsyncResult<T2, E>,
+        op: F,
+    ) -> AsyncResult<U, E> {
+        self.merge(res1, |t, t1| async {
+            Ok(t)
+                .merge(res2, |t, t2| async { op(t, t1, t2).await })
+                .await
+        })
+        .await
+    }
+
+    pub async fn merge3<
+        T1,
+        T2,
+        T3,
+        U,
+        FO: Future<Output = AsyncResult<U, E>>,
+        F: FnOnce(T, T1, T2, T3) -> FO,
+    >(
+        self,
+        res1: AsyncResult<T1, E>,
+        res2: AsyncResult<T2, E>,
+        res3: AsyncResult<T3, E>,
+        op: F,
+    ) -> AsyncResult<U, E> {
+        self.merge(res1, |t, t1| async {
+            Ok(t)
+                .merge(res2, |t, t2| async {
+                    Ok(t).merge(res3, |t, t3| op(t, t1, t2, t3)).await
+                })
+                .await
+        })
+        .await
+    }
+
+    pub async fn merge4<
+        T1,
+        T2,
+        T3,
+        T4,
+        U,
+        FO: Future<Output = AsyncResult<U, E>>,
+        F: FnOnce(T, T1, T2, T3, T4) -> FO,
+    >(
+        self,
+        res1: AsyncResult<T1, E>,
+        res2: AsyncResult<T2, E>,
+        res3: AsyncResult<T3, E>,
+        res4: AsyncResult<T4, E>,
+        op: F,
+    ) -> AsyncResult<U, E> {
+        self.merge(res1, |t, t1| async {
+            Ok(t)
+                .merge(res2, |t, t2| async {
+                    Ok(t)
+                        .merge(res3, |t, t3| async {
+                            Ok(t).merge(res4, |t, t4| op(t, t1, t2, t3, t4)).await
+                        })
+                        .await
+                })
+                .await
+        })
+        .await
     }
 }
 
