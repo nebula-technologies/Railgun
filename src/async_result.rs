@@ -564,3 +564,23 @@ impl<T, E> From<AsyncResult<T, E>> for Result<T, E> {
         }
     }
 }
+
+pub trait IntoAsync<T>: Sized {
+    fn into_async(self) -> T;
+}
+
+impl<T, E> IntoAsync<AsyncResult<T, E>> for Result<T, E> {
+    fn into_async(self) -> AsyncResult<T, E> {
+        AsyncResult::from(self)
+    }
+}
+
+pub trait IntoSync<T>: Sized {
+    fn into_sync(self) -> T;
+}
+
+impl<T, E> IntoSync<Result<T, E>> for AsyncResult<T, E> {
+    fn into_sync(self) -> Result<T, E> {
+        Result::from(self)
+    }
+}
