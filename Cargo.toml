@@ -1,5 +1,5 @@
 [package]
-name = "railgun"
+name = "railsgun"
 version = "0.1.2"
 authors = ["Anders Blenstrup-Pedersen <abp-git@ryuu.technology>"]
 edition = "2018"
