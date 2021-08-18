@@ -225,7 +225,7 @@
 //! [`Err(E)`]: Err
 //! [`io::Error`]: ../../std/io/struct.Error.html
 
-extern crate tokio;
+use tokio;
 use std::future::Future;
 use std::hint;
 

@@ -125,13 +125,14 @@
 //! and even a `into_async`/`into_sync` implementation that is more descriptive
 //! when converting between `AsyncResult` and `Result`
 //!
-//! # ToDo
+//! # Todo
 //! There is a significant need for more documentation on the trait and others
 //! as this library has been in my private stack for a long time and did get the
 //! doc-care it needed.
 //! 1. tap needs doc
 //! 2. merge needs doc
 //! 3. Implement `BlockInPlace` for `AsyncResult`
+//! 4. More unit tests are needed.
 //!
 //! Please open a ticket for more ideas!
 //!
@@ -161,7 +162,8 @@
 //! NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 //! DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+#[macro_use]
+extern crate tokio;
 mod async_result;
 mod block_in_place_result;
 mod map_iterator;

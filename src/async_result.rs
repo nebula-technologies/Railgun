@@ -1694,3 +1694,556 @@ impl<T> DoubleEndedIterator for IntoIter<T> {
 impl<T> ExactSizeIterator for IntoIter<T> {}
 
 impl<T> FusedIterator for IntoIter<T> {}
+
+#[cfg(test)]
+mod test {
+    use crate::AsyncResult::{self, *};
+    use crate::IntoAsync;
+
+    #[tokio::test]
+    async fn is_ok() {
+        let x: AsyncResult<i32, &str> = Ok(-3);
+        assert_eq!(x.is_ok(), true);
+
+        let x: AsyncResult<i32, &str> = Err("Some error message");
+        assert_eq!(x.is_ok(), false);
+    }
+
+    #[tokio::test]
+    pub async fn is_err() {
+        let x: AsyncResult<i32, &str> = Ok(-3);
+        assert_eq!(x.is_err(), false);
+
+        let x: AsyncResult<i32, &str> = Err("Some error message");
+        assert_eq!(x.is_err(), true);
+    }
+
+    #[tokio::test]
+    pub async fn contains() {
+        let x: AsyncResult<u32, &str> = Ok(2);
+        assert_eq!(x.contains(&2), true);
+
+        let x: AsyncResult<u32, &str> = Ok(3);
+        assert_eq!(x.contains(&2), false);
+
+        let x: AsyncResult<u32, &str> = Err("Some error message");
+        assert_eq!(x.contains(&2), false);
+    }
+
+    #[tokio::test]
+    pub async fn contains_err() {
+        let x: AsyncResult<u32, &str> = Ok(2);
+        assert_eq!(x.contains_err(&"Some error message"), false);
+
+        let x: AsyncResult<u32, &str> = Err("Some error message");
+        assert_eq!(x.contains_err(&"Some error message"), true);
+
+        let x: AsyncResult<u32, &str> = Err("Some other error message");
+        assert_eq!(x.contains_err(&"Some error message"), false);
+    }
+
+    #[tokio::test]
+    pub async fn ok() {
+        let x: AsyncResult<u32, &str> = Ok(2);
+        assert_eq!(x.ok(), Some(2));
+
+        let x: AsyncResult<u32, &str> = Err("Nothing here");
+        assert_eq!(x.ok(), None);
+    }
+
+    #[tokio::test]
+    pub async fn err() {
+        let x: AsyncResult<u32, &str> = Ok(2);
+        assert_eq!(x.err(), None);
+
+        let x: AsyncResult<u32, &str> = Err("Nothing here");
+        assert_eq!(x.err(), Some("Nothing here"));
+    }
+
+    #[tokio::test]
+    pub async fn as_ref() {
+        let x: AsyncResult<u32, &str> = Ok(2);
+        assert_eq!(x.as_ref(), Ok(&2));
+
+        let x: AsyncResult<u32, &str> = Err("Error");
+        assert_eq!(x.as_ref(), Err(&"Error"));
+    }
+
+    #[tokio::test]
+    pub async fn as_mut() {
+        fn mutate(r: &mut AsyncResult<i32, i32>) {
+            match r.as_mut() {
+                Ok(v) => *v = 42,
+                Err(e) => *e = 0,
+            }
+        }
+
+        let mut x: AsyncResult<i32, i32> = Ok(2);
+        mutate(&mut x);
+        assert_eq!(x.unwrap(), 42);
+
+        let mut x: AsyncResult<i32, i32> = Err(13);
+        mutate(&mut x);
+        assert_eq!(x.unwrap_err(), 0);
+    }
+
+    #[tokio::test]
+    pub async fn async_map() {
+        let line = "1\n2\n3\n4\n";
+
+        for num in line.lines() {
+            match num
+                .parse::<i32>()
+                .into_async()
+                .async_map(|i| async move { i * 2 })
+                .await
+            {
+                Ok(n) => println!("{}", n),
+                Err(..) => {}
+            }
+        }
+    }
+
+    #[tokio::test]
+    pub async fn map() {
+        let line = "1\n2\n3\n4\n";
+
+        for num in line.lines() {
+            match num.parse::<i32>().into_async().map(|i| i * 2) {
+                Ok(n) => println!("{}", n),
+                Err(..) => {}
+            }
+        }
+    }
+
+    #[tokio::test]
+    pub async fn async_map_or() {
+        let x: AsyncResult<_, &str> = Ok("foo");
+        assert_eq!(x.async_map_or(42, |v| async move { v.len() }).await, 3);
+
+        let x: AsyncResult<&str, _> = Err("bar");
+        assert_eq!(x.async_map_or(42, |v| async move { v.len() }).await, 42);
+    }
+
+    #[tokio::test]
+    pub async fn map_or() {
+        let x: AsyncResult<_, &str> = Ok("foo");
+        assert_eq!(x.map_or(42, |v| v.len()), 3);
+
+        let x: AsyncResult<&str, _> = Err("bar");
+        assert_eq!(x.map_or(42, |v| v.len()), 42);
+    }
+
+    #[tokio::test]
+    pub async fn map_or_else() {
+        let k = 21;
+
+        let x: AsyncResult<_, &str> = Ok("foo");
+        assert_eq!(x.map_or_else(|e| k * 2, |v| v.len()), 3);
+
+        let x: AsyncResult<&str, _> = Err("bar");
+        assert_eq!(x.map_or_else(|e| k * 2, |v| v.len()), 42);
+    }
+
+    #[tokio::test]
+    pub async fn async_map_err() {
+        async fn stringify(x: u32) -> String {
+            format!("error code: {}", x)
+        }
+
+        let x: AsyncResult<u32, u32> = Ok(2);
+        assert_eq!(x.async_map_err(stringify).await, Ok(2));
+
+        let x: AsyncResult<u32, u32> = Err(13);
+        assert_eq!(
+            x.async_map_err(stringify).await,
+            Err("error code: 13".to_string())
+        );
+    }
+
+    #[tokio::test]
+    pub async fn map_err() {
+        fn stringify(x: u32) -> String {
+            format!("error code: {}", x)
+        }
+
+        let x: AsyncResult<u32, u32> = Ok(2);
+        assert_eq!(x.map_err(stringify), Ok(2));
+
+        let x: AsyncResult<u32, u32> = Err(13);
+        assert_eq!(x.map_err(stringify), Err("error code: 13".to_string()));
+    }
+
+    #[tokio::test]
+    pub async fn iter() {
+        let x: AsyncResult<u32, &str> = Ok(7);
+        assert_eq!(x.iter().next(), Some(&7));
+
+        let x: AsyncResult<u32, &str> = Err("nothing!");
+        assert_eq!(x.iter().next(), None);
+    }
+
+    #[tokio::test]
+    pub async fn iter_mut() {
+        let mut x: AsyncResult<u32, &str> = Ok(7);
+        match x.iter_mut().next() {
+            Some(v) => *v = 40,
+            None => {}
+        }
+        assert_eq!(x, Ok(40));
+
+        let mut x: AsyncResult<u32, &str> = Err("nothing!");
+        assert_eq!(x.iter_mut().next(), None);
+    }
+
+    #[tokio::test]
+    pub async fn and() {
+        let x: AsyncResult<u32, &str> = Ok(2);
+        let y: AsyncResult<&str, &str> = Err("late error");
+        assert_eq!(x.and(y), Err("late error"));
+
+        let x: AsyncResult<u32, &str> = Err("early error");
+        let y: AsyncResult<&str, &str> = Ok("foo");
+        assert_eq!(x.and(y), Err("early error"));
+
+        let x: AsyncResult<u32, &str> = Err("not a 2");
+        let y: AsyncResult<&str, &str> = Err("late error");
+        assert_eq!(x.and(y), Err("not a 2"));
+
+        let x: AsyncResult<u32, &str> = Ok(2);
+        let y: AsyncResult<&str, &str> = Ok("different AsyncResult type");
+        assert_eq!(x.and(y), Ok("different AsyncResult type"));
+    }
+
+    #[tokio::test]
+    pub async fn async_and_then() {
+        async fn sq(x: u32) -> AsyncResult<u32, u32> {
+            Ok(x * x)
+        }
+        async fn err(x: u32) -> AsyncResult<u32, u32> {
+            Err(x)
+        }
+
+        assert_eq!(
+            Ok(2).async_and_then(sq).await.async_and_then(sq).await,
+            Ok(16)
+        );
+        assert_eq!(
+            Ok(2).async_and_then(sq).await.async_and_then(err).await,
+            Err(4)
+        );
+        assert_eq!(
+            Ok(2).async_and_then(err).await.async_and_then(sq).await,
+            Err(2)
+        );
+        assert_eq!(
+            Err(3).async_and_then(sq).await.async_and_then(sq).await,
+            Err(3)
+        );
+    }
+
+    #[tokio::test]
+    pub async fn and_then() {
+        fn sq(x: u32) -> AsyncResult<u32, u32> {
+            Ok(x * x)
+        }
+        fn err(x: u32) -> AsyncResult<u32, u32> {
+            Err(x)
+        }
+
+        assert_eq!(Ok(2).and_then(sq).and_then(sq), Ok(16));
+        assert_eq!(Ok(2).and_then(sq).and_then(err), Err(4));
+        assert_eq!(Ok(2).and_then(err).and_then(sq), Err(2));
+        assert_eq!(Err(3).and_then(sq).and_then(sq), Err(3));
+    }
+
+    #[tokio::test]
+    pub async fn or() {
+        let x: AsyncResult<u32, &str> = Ok(2);
+        let y: AsyncResult<u32, &str> = Err("late error");
+        assert_eq!(x.or(y), Ok(2));
+
+        let x: AsyncResult<u32, &str> = Err("early error");
+        let y: AsyncResult<u32, &str> = Ok(2);
+        assert_eq!(x.or(y), Ok(2));
+
+        let x: AsyncResult<u32, &str> = Err("not a 2");
+        let y: AsyncResult<u32, &str> = Err("late error");
+        assert_eq!(x.or(y), Err("late error"));
+
+        let x: AsyncResult<u32, &str> = Ok(2);
+        let y: AsyncResult<u32, &str> = Ok(100);
+        assert_eq!(x.or(y), Ok(2));
+    }
+
+    #[tokio::test]
+    pub async fn async_or_else() {
+        async fn sq(x: u32) -> AsyncResult<u32, u32> {
+            Ok(x * x)
+        }
+        async fn err(x: u32) -> AsyncResult<u32, u32> {
+            Err(x)
+        }
+
+        assert_eq!(Ok(2).async_or_else(sq).await.async_or_else(sq).await, Ok(2));
+        assert_eq!(
+            Ok(2).async_or_else(err).await.async_or_else(sq).await,
+            Ok(2)
+        );
+        assert_eq!(
+            Err(3).async_or_else(sq).await.async_or_else(err).await,
+            Ok(9)
+        );
+        assert_eq!(
+            Err(3).async_or_else(err).await.async_or_else(err).await,
+            Err(3)
+        );
+    }
+
+    #[tokio::test]
+    pub async fn or_else() {
+        fn sq(x: u32) -> AsyncResult<u32, u32> {
+            Ok(x * x)
+        }
+        fn err(x: u32) -> AsyncResult<u32, u32> {
+            Err(x)
+        }
+
+        assert_eq!(Ok(2).or_else(sq).or_else(sq), Ok(2));
+        assert_eq!(Ok(2).or_else(err).or_else(sq), Ok(2));
+        assert_eq!(Err(3).or_else(sq).or_else(err), Ok(9));
+        assert_eq!(Err(3).or_else(err).or_else(err), Err(3));
+    }
+
+    #[tokio::test]
+    pub async fn unwrap_or() {
+        let default = 2;
+        let x: AsyncResult<u32, &str> = Ok(9);
+        assert_eq!(x.unwrap_or(default), 9);
+
+        let x: AsyncResult<u32, &str> = Err("error");
+        assert_eq!(x.unwrap_or(default), default);
+    }
+
+    #[tokio::test]
+    pub async fn async_unwrap_or_else() {
+        async fn count(x: &str) -> usize {
+            x.len()
+        }
+
+        assert_eq!(Ok(2).async_unwrap_or_else(count).await, 2);
+        assert_eq!(Err("foo").async_unwrap_or_else(count).await, 3);
+    }
+
+    #[tokio::test]
+    pub async fn unwrap_or_else() {
+        fn count(x: &str) -> usize {
+            x.len()
+        }
+
+        assert_eq!(Ok(2).unwrap_or_else(count), 2);
+        assert_eq!(Err("foo").unwrap_or_else(count), 3);
+    }
+
+    #[tokio::test]
+    pub async fn unwrap_unchecked() {
+        let x: AsyncResult<u32, &str> = Ok(2);
+        assert_eq!(unsafe { x.unwrap_unchecked() }, 2);
+    }
+
+    #[tokio::test]
+    #[should_panic]
+    pub async fn unwrap_unchecked_no_run() {
+        let x: AsyncResult<u32, &str> = Err("emergency failure");
+        unsafe {
+            x.unwrap_unchecked();
+        } // Undefined behavior!
+    }
+
+    #[tokio::test]
+    #[should_panic]
+    pub async fn unwrap_err_unchecked_no_run() {
+        let x: AsyncResult<u32, &str> = Ok(2);
+        unsafe { x.unwrap_err_unchecked() }; // Undefined behavior!
+    }
+
+    #[tokio::test]
+    pub async fn unwrap_err_unchecked() {
+        let x: AsyncResult<u32, &str> = Err("emergency failure");
+        assert_eq!(unsafe { x.unwrap_err_unchecked() }, "emergency failure");
+    }
+
+    #[tokio::test]
+    pub async fn copied() {
+        let val = 12;
+        let x: AsyncResult<&i32, i32> = Ok(&val);
+        assert_eq!(x, Ok(&12));
+        let copied = x.copied();
+        assert_eq!(copied, Ok(12));
+    }
+
+    #[tokio::test]
+    pub async fn copied_mut() {
+        let mut val = 12;
+        let x: AsyncResult<&mut i32, i32> = Ok(&mut val);
+        assert_eq!(x, Ok(&mut 12));
+        let copied = x.copied();
+        assert_eq!(copied, Ok(12));
+    }
+
+    #[tokio::test]
+    pub async fn cloned() {
+        let val = 12;
+        let x: AsyncResult<&i32, i32> = Ok(&val);
+        assert_eq!(x, Ok(&12));
+        let cloned = x.cloned();
+        assert_eq!(cloned, Ok(12));
+    }
+
+    #[tokio::test]
+    pub async fn cloned_mut() {
+        let mut val = 12;
+        let x: AsyncResult<&mut i32, i32> = Ok(&mut val);
+        assert_eq!(x, Ok(&mut 12));
+        let cloned = x.cloned();
+        assert_eq!(cloned, Ok(12));
+    }
+
+    #[tokio::test]
+    #[should_panic]
+    pub async fn expect() {
+        let x: AsyncResult<u32, &str> = Err("emergency failure");
+        x.expect("Testing expect"); // panics with `Testing expect: emergency failure`
+    }
+
+    #[tokio::test]
+    pub async fn unwrap() {
+        let x: AsyncResult<u32, &str> = Ok(2);
+
+        assert_eq!(x.unwrap(), 2);
+    }
+
+    #[tokio::test]
+    #[should_panic]
+    pub async fn unwrap_panic() {
+        let x: AsyncResult<u32, &str> = Err("emergency failure");
+        x.unwrap(); // panics with `emergency failure`
+    }
+
+    #[tokio::test]
+    #[should_panic]
+    pub async fn expect_err_panic() {
+        let x: AsyncResult<u32, &str> = Ok(10);
+        x.expect_err("Testing expect_err"); // panics with `Testing expect_err: 10`
+    }
+
+    #[tokio::test]
+    #[should_panic]
+    pub async fn unwrap_err_panic() {
+        let x: AsyncResult<u32, &str> = Ok(2);
+        x.unwrap_err(); // panics with `2`
+    }
+
+    #[tokio::test]
+    pub async fn unwrap_err() {
+        let x: AsyncResult<u32, &str> = Err("emergency failure");
+        assert_eq!(x.unwrap_err(), "emergency failure");
+    }
+
+    #[tokio::test]
+    pub async fn unwrap_or_default() {
+        let good_year_from_input = "1909";
+        let bad_year_from_input = "190blarg";
+        let good_year = good_year_from_input.parse().unwrap_or_default();
+        let bad_year = bad_year_from_input.parse().unwrap_or_default();
+
+        assert_eq!(1909, good_year);
+        assert_eq!(0, bad_year);
+    }
+
+    #[tokio::test]
+    pub async fn test_as_deref() {
+        let x: AsyncResult<String, u32> = Ok("hello".to_string());
+        let y: AsyncResult<&str, &u32> = Ok("hello");
+        assert_eq!(x.as_deref(), y);
+
+        let x: AsyncResult<String, u32> = Err(42);
+        let y: AsyncResult<&str, &u32> = Err(&42);
+        assert_eq!(x.as_deref(), y);
+    }
+
+    #[tokio::test]
+    pub async fn test_as_deref_mut() {
+        let mut s = "HELLO".to_string();
+        let mut x: AsyncResult<String, u32> = Ok("hello".to_string());
+        let y: AsyncResult<&mut str, &mut u32> = Ok(&mut s);
+        assert_eq!(
+            x.as_deref_mut().map(|x| {
+                x.make_ascii_uppercase();
+                x
+            }),
+            y
+        );
+
+        let mut i = 42;
+        let mut x: AsyncResult<String, u32> = Err(42);
+        let y: AsyncResult<&mut str, &mut u32> = Err(&mut i);
+        assert_eq!(
+            x.as_deref_mut().map(|x| {
+                x.make_ascii_uppercase();
+                x
+            }),
+            y
+        );
+    }
+
+    #[tokio::test]
+    pub async fn test_transpose() {
+        #[derive(Debug, Eq, PartialEq)]
+        struct SomeErr;
+
+        let x: AsyncResult<Option<i32>, SomeErr> = Ok(Some(5));
+        let y: Option<AsyncResult<i32, SomeErr>> = Some(Ok(5));
+        assert_eq!(x.transpose(), y);
+    }
+
+    #[tokio::test]
+    pub async fn test_flatten_level_1() {
+        let x: AsyncResult<AsyncResult<&'static str, u32>, u32> = Ok(Ok("hello"));
+        assert_eq!(Ok("hello"), x.flatten());
+
+        let x: AsyncResult<AsyncResult<&'static str, u32>, u32> = Ok(Err(6));
+        assert_eq!(Err(6), x.flatten());
+
+        let x: AsyncResult<AsyncResult<&'static str, u32>, u32> = Err(6);
+        assert_eq!(Err(6), x.flatten())
+    }
+
+    #[tokio::test]
+    pub async fn test_flatten_level_2() {
+        let x: AsyncResult<AsyncResult<AsyncResult<&'static str, u32>, u32>, u32> =
+            Ok(Ok(Ok("hello")));
+        assert_eq!(Ok(Ok("hello")), x.flatten());
+        assert_eq!(Ok("hello"), x.flatten().flatten());
+    }
+
+    #[tokio::test]
+    pub async fn test_into_ok_or_err() {
+        let ok: AsyncResult<u32, u32> = Ok(3);
+        let err: AsyncResult<u32, u32> = Err(4);
+
+        assert_eq!(ok.into_ok_or_err(), 3);
+        assert_eq!(err.into_ok_or_err(), 4);
+    }
+
+    #[tokio::test]
+    pub async fn test_into_iter() {
+        let x: AsyncResult<u32, &str> = Ok(5);
+        let v: Vec<u32> = x.into_iter().collect();
+        assert_eq!(v, [5]);
+
+        let x: AsyncResult<u32, &str> = Err("nothing!");
+        let v: Vec<u32> = x.into_iter().collect();
+        assert_eq!(v, []);
+    }
+}

@@ -125,13 +125,14 @@ Of course this also comes with `From`/`Into` implementations for `Result`
 and even a `into_async`/`into_sync` implementation that is more descriptive
 when converting between `AsyncResult` and `Result`
 
-# ToDo
+# Todo
 There is a significant need for more documentation on the trait and others
 as this library has been in my private stack for a long time and did get the
 doc-care it needed.
 1. tap needs doc
 2. merge needs doc
 3. Implement `BlockInPlace` for `AsyncResult`
+4. More unit tests are needed.
 
 Please open a ticket for more ideas!
 

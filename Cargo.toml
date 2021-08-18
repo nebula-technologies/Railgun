@@ -1,6 +1,6 @@
 [package]
 name = "railsgun"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Anders Blenstrup-Pedersen <abp-git@ryuu.technology>"]
 edition = "2018"
 description = "Excessive tooling for Result handling - If you want rails you got RAILS!"
@@ -11,5 +11,5 @@ license = "MIT"
 repository = "https://github.com/nebula-technologies/Railgun"
 
 [dependencies.tokio]
-version = "1.8.1"
-features = ["rt-multi-thread"]
+version = "1.10.0"
+features = ["rt-multi-thread", "rt", "macros"]
