@@ -514,17 +514,33 @@ pub trait BlockInPlaceResult<T, E> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(option_result_unwrap_unchecked)]
-    /// use std::future::Future;
-    /// let x: dyn Future<Output = Result<u32, &str>> = async {Ok(2)};
-    /// assert_eq!(unsafe { x.unwrap_unchecked() }, 2);
+    /// use railgun::BlockInPlaceResult;
+    /// # use tokio;
+    /// # tokio::runtime::Builder::new_multi_thread()
+    /// #      .worker_threads(1)
+    /// #      .thread_name("rocket-worker-thread")
+    /// #      .enable_all()
+    /// #      .build()
+    /// #      .expect("create tokio runtime")
+    /// #      .block_on(async {
+    ///
+    /// assert_eq!(unsafe { async {Ok(2) as Result<_, &str>}.unwrap_unchecked() }, 2);
+    /// # });
     /// ```
     ///
     /// ```no_run
-    /// #![feature(option_result_unwrap_unchecked)]
-    /// use std::future::Future;
-    /// let x: dyn Future<Output = Result<u32, &str>> = async {Err("emergency failure")};
-    /// unsafe { x.unwrap_unchecked(); } // Undefined behavior!
+    /// use railgun::BlockInPlaceResult;
+    /// # use tokio;
+    /// # tokio::runtime::Builder::new_multi_thread()
+    /// #      .worker_threads(1)
+    /// #      .thread_name("rocket-worker-thread")
+    /// #      .enable_all()
+    /// #      .build()
+    /// #      .expect("create tokio runtime")
+    /// #      .block_on(async {
+    ///
+    /// unsafe { async {Err("emergency failure") as Result<u32, _>}.unwrap_unchecked(); } // Undefined behavior!
+    /// # });
     /// ```
     #[track_caller]
     unsafe fn unwrap_unchecked(self) -> T;
@@ -541,17 +557,32 @@ pub trait BlockInPlaceResult<T, E> {
     /// # Examples
     ///
     /// ```no_run
-    /// #![feature(option_result_unwrap_unchecked)]
-    /// use std::future::Future;
-    /// let x: dyn Future<Output = Result<u32, &str>> = async {Ok(2)};
-    /// unsafe { x.unwrap_err_unchecked() }; // Undefined behavior!
+    /// use railgun::BlockInPlaceResult;
+    /// # use tokio;
+    /// # tokio::runtime::Builder::new_multi_thread()
+    /// #      .worker_threads(1)
+    /// #      .thread_name("rocket-worker-thread")
+    /// #      .enable_all()
+    /// #      .build()
+    /// #      .expect("create tokio runtime")
+    /// #      .block_on(async {
+    ///
+    /// unsafe { async {Ok(2) as Result<_, &str>}.unwrap_err_unchecked() }; // Undefined behavior!
+    /// #      });
     /// ```
     ///
     /// ```
-    /// #![feature(option_result_unwrap_unchecked)]
-    /// use std::future::Future;
-    /// let x: dyn Future<Output = Result<u32, &str>> = async {Err("emergency failure")};
-    /// assert_eq!(unsafe { x.unwrap_err_unchecked() }, "emergency failure");
+    /// use railgun::BlockInPlaceResult;
+    /// # use tokio;
+    /// # tokio::runtime::Builder::new_multi_thread()
+    /// #      .worker_threads(1)
+    /// #      .thread_name("rocket-worker-thread")
+    /// #      .enable_all()
+    /// #      .build()
+    /// #      .expect("create tokio runtime")
+    /// #      .block_on(async {
+    /// assert_eq!(unsafe { async {Err("emergency failure") as Result<u32, _>}.unwrap_err_unchecked() }, "emergency failure");
+    /// #      });
     /// ```
     #[track_caller]
     unsafe fn unwrap_err_unchecked(self) -> E;
@@ -937,17 +968,33 @@ where
     /// # Examples
     ///
     /// ```
-    /// #![feature(option_result_unwrap_unchecked)]
-    /// use std::future::Future;
-    /// let x: dyn Future<Output = Result<u32, &str>> = async {Ok(2)};
-    /// assert_eq!(unsafe { x.unwrap_unchecked() }, 2);
+    /// use railgun::BlockInPlaceResult;
+    ///
+    /// # use tokio;
+    /// # tokio::runtime::Builder::new_multi_thread()
+    /// #      .worker_threads(1)
+    /// #      .thread_name("rocket-worker-thread")
+    /// #      .enable_all()
+    /// #      .build()
+    /// #      .expect("create tokio runtime")
+    /// #      .block_on(async {
+    /// assert_eq!(unsafe { async {Ok(2) as Result<_, &str>}.unwrap_unchecked() }, 2);
+    /// # });
     /// ```
     ///
     /// ```no_run
-    /// #![feature(option_result_unwrap_unchecked)]
-    /// use std::future::Future;
-    /// let x: dyn Future<Output = Result<u32, &str>> = async {Err("emergency failure")};
-    /// unsafe { x.unwrap_unchecked(); } // Undefined behavior!
+    /// use railgun::BlockInPlaceResult;
+    ///
+    /// # use tokio;
+    /// # tokio::runtime::Builder::new_multi_thread()
+    /// #      .worker_threads(1)
+    /// #      .thread_name("rocket-worker-thread")
+    /// #      .enable_all()
+    /// #      .build()
+    /// #      .expect("create tokio runtime")
+    /// #      .block_on(async {
+    /// unsafe { async {Err("emergency failure") as Result<u32, _>}.unwrap_unchecked(); } // Undefined behavior!
+    /// # });
     /// ```
     #[inline]
     #[track_caller]
@@ -975,17 +1022,33 @@ where
     /// # Examples
     ///
     /// ```no_run
-    /// #![feature(option_result_unwrap_unchecked)]
-    /// use std::future::Future;
-    /// let x: dyn Future<Output = Result<u32, &str>> = async {Ok(2)};
-    /// unsafe { x.unwrap_err_unchecked() }; // Undefined behavior!
+    /// use railgun::BlockInPlaceResult;
+    /// # use tokio;
+    /// # tokio::runtime::Builder::new_multi_thread()
+    /// #      .worker_threads(1)
+    /// #      .thread_name("rocket-worker-thread")
+    /// #      .enable_all()
+    /// #      .build()
+    /// #      .expect("create tokio runtime")
+    /// #      .block_on(async {
+    ///
+    /// unsafe { async {Ok(2) as Result<_, &str>}.unwrap_err_unchecked() }; // Undefined behavior!
+    /// # });
     /// ```
     ///
     /// ```
-    /// #![feature(option_result_unwrap_unchecked)]
-    /// use std::future::Future;
-    /// let x: dyn Future<Output = Result<u32, &str>> = async {Err("emergency failure")};
-    /// assert_eq!(unsafe { x.unwrap_err_unchecked() }, "emergency failure");
+    /// use railgun::BlockInPlaceResult;
+    /// # use tokio;
+    /// # tokio::runtime::Builder::new_multi_thread()
+    /// #      .worker_threads(1)
+    /// #      .thread_name("rocket-worker-thread")
+    /// #      .enable_all()
+    /// #      .build()
+    /// #      .expect("create tokio runtime")
+    /// #      .block_on(async {
+    ///
+    /// assert_eq!(unsafe { async {Err("emergency failure") as Result<u32, _>}.unwrap_err_unchecked() }, "emergency failure");
+    /// # });
     /// ```
     #[inline]
     #[track_caller]

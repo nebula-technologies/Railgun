@@ -10,7 +10,7 @@ use AsyncResult::{Err, Ok};
 /// The async AsyncResult is a AsyncResult implementation done for allowing the execution of async functions
 /// within `map`, `map_err`, `and_then` etc. Similar to the regular `AsyncResult`.
 /// The concept is to allow for fully async rails in Rust and execute code without using the `?` and breaking the paradigm of rails.
-
+#[derive(Copy, PartialEq, PartialOrd, Eq, Ord, Debug, Hash)]
 pub enum AsyncResult<T, E> {
     Ok(T),
     Err(E),
@@ -70,7 +70,6 @@ impl<T, E> AsyncResult<T, E> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(option_result_contains)]
     /// use railgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<u32, &str> = Ok(2);
@@ -99,7 +98,6 @@ impl<T, E> AsyncResult<T, E> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(result_contains_err)]
     /// use railgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<u32, &str> = Ok(2);
@@ -258,14 +256,16 @@ impl<T, E> AsyncResult<T, E> {
     /// use railgun::AsyncResult::{self, *};
     /// use railgun::IntoAsync;
     ///
+    /// # async fn run() -> () {
     /// let line = "1\n2\n3\n4\n";
     ///
     /// for num in line.lines() {
-    ///     match num.parse::<i32>().into_async().async_map(|i| async {i * 2}).await {
+    ///     match num.parse::<i32>().into_async().async_map(|i| async move {i * 2}).await {
     ///         Ok(n) => println!("{}", n),
     ///         Err(..) => {}
     ///     }
     /// }
+    /// # }
     /// ```
     ///
     /// > TODO: Example needs improvement!
@@ -290,6 +290,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Print the numbers on each line of a string multiplied by two.
     ///
     /// ```
+    /// use railgun::AsyncResult::{self, *};
     /// use railgun::IntoAsync;
     ///
     /// let line = "1\n2\n3\n4\n";
@@ -323,11 +324,13 @@ impl<T, E> AsyncResult<T, E> {
     /// ```
     /// use railgun::AsyncResult::{self, *};
     ///
+    /// # async fn run() -> () {
     /// let x: AsyncResult<_, &str> = Ok("foo");
-    /// assert_eq!(x.async_map_or(42, |v| async{v.len()}).await, 3);
+    /// assert_eq!(x.async_map_or(42, |v| async move {v.len()}).await, 3);
     ///
     /// let x: AsyncResult<&str, _> = Err("bar");
-    /// assert_eq!(x.async_map_or(42, |v| async{v.len()}).await, 42);
+    /// assert_eq!(x.async_map_or(42, |v| async move {v.len()}).await, 42);
+    /// # }
     /// ```
     #[inline]
     pub async fn async_map_or<U, UO: Future<Output = U>, F: FnOnce(T) -> UO>(
@@ -369,45 +372,54 @@ impl<T, E> AsyncResult<T, E> {
         }
     }
 
-    /// Maps a `AsyncResult<T, E>` to `U` by applying a function to a
-    /// contained [`Ok`] value, or a fallback function to a
-    /// contained [`Err`] value.
-    ///
-    /// This function can be used to unpack a successful AsyncResult
-    /// while handling an error.
-    ///
-    ///
-    /// # Examples
-    ///
-    /// Basic usage:
-    ///
-    /// ```
-    /// use railgun::AsyncResult::{self, *};
-    ///
-    /// let k = 21;
-    ///
-    /// let x : AsyncResult<_, &str> = Ok("foo");
-    /// assert_eq!(x.async_map_or_else(|e| async {k * 2}, |v| async{v.len()}).await, 3);
-    ///
-    /// let x : AsyncResult<&str, _> = Err("bar");
-    /// assert_eq!(x.async_map_or_else(|e| async{ k * 2}, |v| async{v.len()}).await, 42);
-    /// ```
-    #[inline]
-    pub async fn async_map_or_else<
-        U,
-        UO: Future<Output = U>,
-        D: FnOnce(E) -> UO,
-        F: FnOnce(T) -> UO,
-    >(
-        self,
-        default: D,
-        f: F,
-    ) -> U {
-        match self {
-            Ok(t) => f(t).await,
-            Err(e) => default(e).await,
-        }
-    }
+    // /// Maps a `AsyncResult<T, E>` to `U` by applying a function to a
+    // /// contained [`Ok`] value, or a fallback function to a
+    // /// contained [`Err`] value.
+    // ///
+    // /// This function can be used to unpack a successful AsyncResult
+    // /// while handling an error.
+    // ///
+    // ///
+    // /// # Examples
+    // ///
+    // /// Basic usage:
+    // ///
+    // /// ```
+    // /// use railgun::AsyncResult::{self, *};
+    // ///
+    // /// # async fn run() -> () {
+    // /// let k: u32 = 21;
+    // /// let l: u32 = 21;
+    // ///
+    // /// let x : AsyncResult<_, &str> = Ok("foo");
+    // /// assert_eq!(x.async_map_or_else(
+    // ///     async |e| {k * 2},
+    // ///     async |v| {v.len() as u32}
+    // /// ).await, 3);
+    // ///
+    // /// let x : AsyncResult<&str, _> = Err("bar");
+    // /// assert_eq!(x.async_map_or_else(
+    // ///     async |e| {l * 2},
+    // ///     async |v| {v.len() as u32}
+    // /// ).await, 42);
+    // /// # }
+    // /// ```
+    // #[inline]
+    // pub async fn async_map_or_else<
+    //     U,
+    //     UO: Future<Output = U>,
+    //     D: FnOnce(E) -> UO,
+    //     F: FnOnce(T) -> UO,
+    // >(
+    //     self,
+    //     default: D,
+    //     f: F,
+    // ) -> U {
+    //     match self {
+    //         Ok(t) => f(t).await,
+    //         Err(e) => default(e).await,
+    //     }
+    // }
 
     /// Maps a `AsyncResult<T, E>` to `U` by applying a function to a
     /// contained [`Ok`] value, or a fallback function to a
@@ -456,11 +468,13 @@ impl<T, E> AsyncResult<T, E> {
     ///
     /// async fn stringify(x: u32) -> String{ format!("error code: {}", x) }
     ///
+    /// # async fn run() -> () {
     /// let x: AsyncResult<u32, u32> = Ok(2);
     /// assert_eq!(x.async_map_err(stringify).await, Ok(2));
     ///
     /// let x: AsyncResult<u32, u32> = Err(13);
     /// assert_eq!(x.async_map_err(stringify).await, Err("error code: 13".to_string()));
+    /// }
     /// ```
     #[inline]
     pub async fn async_map_err<F, FO: Future<Output = F>, O: FnOnce(E) -> FO>(
@@ -612,10 +626,12 @@ impl<T, E> AsyncResult<T, E> {
     /// async fn sq(x: u32) -> AsyncResult<u32, u32> { Ok(x * x) }
     /// async fn err(x: u32) -> AsyncResult<u32, u32> { Err(x) }
     ///
+    /// # async fn run() -> () {
     /// assert_eq!(Ok(2).async_and_then(sq).await.async_and_then(sq).await, Ok(16));
     /// assert_eq!(Ok(2).async_and_then(sq).await.async_and_then(err).await, Err(4));
     /// assert_eq!(Ok(2).async_and_then(err).await.async_and_then(sq).await, Err(2));
     /// assert_eq!(Err(3).async_and_then(sq).await.async_and_then(sq).await, Err(3));
+    /// # }
     /// ```
     #[inline]
     pub async fn async_and_then<U, OUT: Future<Output = AsyncResult<U, E>>, F: FnOnce(T) -> OUT>(
@@ -710,10 +726,12 @@ impl<T, E> AsyncResult<T, E> {
     /// async fn sq(x: u32) -> AsyncResult<u32, u32> { Ok(x * x) }
     /// async fn err(x: u32) -> AsyncResult<u32, u32> { Err(x) }
     ///
+    /// # async fn run() -> () {
     /// assert_eq!(Ok(2).async_or_else(sq).await.async_or_else(sq).await, Ok(2));
     /// assert_eq!(Ok(2).async_or_else(err).await.async_or_else(sq).await, Ok(2));
     /// assert_eq!(Err(3).async_or_else(sq).await.async_or_else(err).await, Ok(9));
     /// assert_eq!(Err(3).async_or_else(err).await.async_or_else(err).await, Err(3));
+    /// # }
     /// ```
     #[inline]
     pub async fn async_or_else<F, OUT: Future<Output = AsyncResult<T, F>>, O: FnOnce(E) -> OUT>(
@@ -796,8 +814,10 @@ impl<T, E> AsyncResult<T, E> {
     ///
     /// async fn count(x: &str) -> usize { x.len() }
     ///
+    /// # async fn run() -> () {
     /// assert_eq!(Ok(2).async_unwrap_or_else(count).await, 2);
     /// assert_eq!(Err("foo").async_unwrap_or_else(count).await, 3);
+    /// # }
     /// ```
     #[inline]
     pub async fn async_unwrap_or_else<TO: Future<Output = T>, F: FnOnce(E) -> TO>(
@@ -843,19 +863,16 @@ impl<T, E> AsyncResult<T, E> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(option_result_unwrap_unchecked)]
     /// use railgun::AsyncResult::{self, *};
     ///
-    /// use std::future::Future;
-    /// let x: dyn Future<Output = AsyncResult<u32, &str>> = Ok(2);
+    /// let x: AsyncResult<u32, &str> = Ok(2);
     /// assert_eq!(unsafe { x.unwrap_unchecked() }, 2);
     /// ```
     ///
     /// ```no_run
-    /// #![feature(option_result_unwrap_unchecked)]
     /// use railgun::AsyncResult::{self, *};
-    /// use std::future::Future;
-    /// let x: dyn Future<Output = AsyncResult<u32, &str>> = Err("emergency failure");
+    ///
+    /// let x: AsyncResult<u32, &str> = Err("emergency failure");
     /// unsafe { x.unwrap_unchecked(); } // Undefined behavior!
     /// ```
     #[inline]
@@ -882,20 +899,17 @@ impl<T, E> AsyncResult<T, E> {
     /// # Examples
     ///
     /// ```no_run
-    /// #![feature(option_result_unwrap_unchecked)]
     /// use railgun::AsyncResult::{self, *};
     /// use std::future::Future;
     ///
-    /// let x: dyn Future<Output = AsyncResult<u32, &str>> = Ok(2);
+    /// let x: AsyncResult<u32, &str> = Ok(2);
     /// unsafe { x.unwrap_err_unchecked() }; // Undefined behavior!
     /// ```
     ///
     /// ```
-    /// #![feature(option_result_unwrap_unchecked)]
     /// use railgun::AsyncResult::{self, *};
-    /// use std::future::Future;
     ///
-    /// let x: dyn Future<Output = AsyncResult<u32, &str>> = Err("emergency failure");
+    /// let x: AsyncResult<u32, &str> = Err("emergency failure");
     /// assert_eq!(unsafe { x.unwrap_err_unchecked() }, "emergency failure");
     /// ```
     #[inline]
@@ -1099,7 +1113,6 @@ impl<T: Copy, E> AsyncResult<&T, E> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(result_copied)]
     /// use railgun::AsyncResult::{self, *};
     ///
     /// let val = 12;
@@ -1120,7 +1133,6 @@ impl<T: Copy, E> AsyncResult<&mut T, E> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(result_copied)]
     /// use railgun::AsyncResult::{self, *};
     ///
     /// let mut val = 12;
@@ -1141,7 +1153,6 @@ impl<T: Clone, E> AsyncResult<&T, E> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(result_cloned)]
     /// use railgun::AsyncResult::{self, *};
     ///
     /// let val = 12;
@@ -1162,7 +1173,6 @@ impl<T: Clone, E> AsyncResult<&mut T, E> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(result_cloned)]
     /// use railgun::AsyncResult::{self, *};
     ///
     /// let mut val = 12;
@@ -1429,7 +1439,6 @@ impl<T, E> AsyncResult<AsyncResult<T, E>, E> {
     /// Basic usage:
     ///
     /// ```
-    /// #![feature(result_flattening)]
     /// use railgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<AsyncResult<&'static str, u32>, u32> = Ok(Ok("hello"));
@@ -1439,13 +1448,12 @@ impl<T, E> AsyncResult<AsyncResult<T, E>, E> {
     /// assert_eq!(Err(6), x.flatten());
     ///
     /// let x: AsyncResult<AsyncResult<&'static str, u32>, u32> = Err(6);
-    /// assert_eq!(Err(6), x.flatten());
+    /// assert_eq!(Err(6), x.flatten())
     /// ```
     ///
     /// Flattening only removes one level of nesting at a time:
     ///
     /// ```
-    /// #![feature(result_flattening)]
     /// use railgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<AsyncResult<AsyncResult<&'static str, u32>, u32>, u32> = Ok(Ok(Ok("hello")));
@@ -1475,7 +1483,6 @@ impl<T> AsyncResult<T, T> {
     /// # Examples
     ///
     /// ```
-    /// #![feature(result_into_ok_or_err)]
     /// use railgun::AsyncResult::{self, *};
     ///
     /// let ok: AsyncResult<u32, u32> = Ok(3);
