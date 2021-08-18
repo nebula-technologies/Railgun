@@ -1,20 +1,20 @@
 //! # RailsGun
 //!
 //! RailsGun or Railgun, call it how you want it.
-//! This crate add a lot of small but usefull functionality to the existing
+//! This crate add a lot of small but valuable functionality to the existing
 //! Rail paradigm in rust.
 //!
-//! If you are used to use rails in rust, you know what its all about! If
-//! its the first time you hear about it I would highly suggest you to read
+//! If you are used to using rails in rust, you know what it's all about! If
+//! its the first time you hear about it, I would highly suggest you read
 //! the following [Railway Oriented Programming](https://fsharpforfunandprofit.com/rop/);
-//! In short its a programming style that I have found over multiple project
+//! In short its a programming style that I have found over multiple projects
 //! and services to reduce the errors.
 //!
 //! This crate supplies you with some extra missing tools and simplifications
 //! as follows:
 //!
 //! ## tap, tap_err, tap_ref, tap_err_ref
-//! This is a nice little trait that adds the ability to "tap" the contents.
+//! This is an excellent little trait that adds the ability to "tap" the contents.
 //! This means that you can get a copy/clone of the original content that
 //! you can use for analysis or other destructive operations without
 //! actually touching the original.
@@ -47,9 +47,9 @@
 //!     )
 //! ).ok();
 //! ```
-//! This is a very ugly method of combining 3 results, you could
-//! split it out in multiple functions, but at times that is very
-//! excessive. Merge supplies you with a nice functionality for this.
+//! This is a hideous method of combining three results, you could
+//! split it out into multiple functions, but at times that is very
+//! excessive. Merge supplies you with superior functionality for this.
 //! ```rust
 //! use railsgun::Merge;
 //!
@@ -64,13 +64,13 @@
 //! x.merge2(y, z, |var_x, var_y, var_z| func_xyz(var_x, var_y, var_z)).ok();
 //! # }
 //! ```
-//! As you can see this simplifies the rail significantly and makes
+//! As you can see, this simplifies the rail significantly and makes
 //! it more readable/maintainable.
 //!
 //!
 //! ## Trait BlockInPlaceResult
-//! This is a trait that requires your system to currently be running
-//! inside a Tokio thread as it requires multithreading. That said it adds some
+//! This trait requires your system to currently be running
+//! inside a Tokio thread as it requires multithreading. That said, it adds some
 //! interesting capabilities on top of the result.
 //! If the following annoys you:
 //!
@@ -95,7 +95,7 @@
 //! my_async_fn().map(|t| format!("{}", t)).ok();
 //! # };
 //! ```
-//! Please note this is using tokios `block_in_place` for execution
+//! Please note this is using tokio `block_in_place` for execution.
 //!
 //! ## AsyncResult
 //! As the name describes, this is an `AsyncResult`. It has almost everything
@@ -118,12 +118,12 @@
 //!     .ok();
 //! # };
 //! ```
-//! Of course this is not the prettiest thing, but it allows the system to
+//! Of course, this is not the prettiest thing, but it allows the system to
 //! keep to its rail and keep processing without moving in and out of the rails.
 //!
-//! Of course this also comes with `From`/`Into` implementations for `Result`
-//! and even a `into_async`/`into_sync` implementation that is more descriptive
-//! when converting between `AsyncResult` and `Result`
+//! Of course, this also comes with `From`/`Into` implementations for `Result`
+//! and even an `into_async`/`into_sync` implementation that is more descriptive
+//! when converting between `AsyncResult` and `Result`.
 //!
 //! # Todo
 //! There is a significant need for more documentation on the trait and others
@@ -137,18 +137,18 @@
 //! Please open a ticket for more ideas!
 //!
 //! # Contribution
-//! Feel free to contribute to the project. Currently the project is hosted
+//! Feel free to contribute to the project. Currently, the project is hosted
 //! on both [GitHub](https://github.com/nebula-technologies/Railgun) and
 //! my private [GitLab](https://gitlab.nebula.technology/rust/railsgun).
-//! The main repository is the GitLab repository where all of the pipelines
-//! and all of my projects exists.
+//! The main repository is the GitLab repository, where all of the pipelines
+//! and all of my projects exist.
 //!
 //! # License
 //! The MIT License (MIT)
 //!
 //! Copyright © 2021 <copyright holders>
 //!
-//! Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+//! Permission is hereby granted, free of charge, to any person obtaining a copy of this Software
 //! and associated documentation files (the “Software”), to deal in the Software without restriction,
 //! including without limitation the rights to use, copy, modify, merge, publish, distribute,
 //! sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
