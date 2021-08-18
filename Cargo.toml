@@ -4,8 +4,6 @@ version = "0.1.2"
 authors = ["Anders Blenstrup-Pedersen <abp-git@ryuu.technology>"]
 edition = "2018"
 
-[dependencies]
-async-trait = "0.1.50"
 [dependencies.tokio]
 version = "1.8.1"
 features = ["rt-multi-thread"]

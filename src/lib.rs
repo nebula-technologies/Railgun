@@ -1,6 +1,3 @@
-#[macro_use]
-extern crate async_trait;
-
 mod async_result;
 mod block_in_place_result;
 mod map_iterator;
