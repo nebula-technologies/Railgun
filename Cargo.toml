@@ -3,6 +3,11 @@ name = "railgun"
 version = "0.1.2"
 authors = ["Anders Blenstrup-Pedersen <abp-git@ryuu.technology>"]
 edition = "2018"
+description = "Excessive tooling for Result handling"
+readme = "README.md"
+categories = []
+license = "MIT"
+repository = "https://github.com/nebula-technologies/Railgun"
 
 [dependencies.tokio]
 version = "1.8.1"
