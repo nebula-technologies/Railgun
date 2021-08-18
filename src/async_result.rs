@@ -28,7 +28,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<i32, &str> = Ok(-3);
     /// assert_eq!(x.is_ok(), true);
@@ -50,7 +50,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<i32, &str> = Ok(-3);
     /// assert_eq!(x.is_err(), false);
@@ -70,7 +70,7 @@ impl<T, E> AsyncResult<T, E> {
     /// # Examples
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<u32, &str> = Ok(2);
     /// assert_eq!(x.contains(&2), true);
@@ -98,7 +98,7 @@ impl<T, E> AsyncResult<T, E> {
     /// # Examples
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<u32, &str> = Ok(2);
     /// assert_eq!(x.contains_err(&"Some error message"), false);
@@ -135,7 +135,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<u32, &str> = Ok(2);
     /// assert_eq!(x.ok(), Some(2));
@@ -161,7 +161,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<u32, &str> = Ok(2);
     /// assert_eq!(x.err(), None);
@@ -191,7 +191,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<u32, &str> = Ok(2);
     /// assert_eq!(x.as_ref(), Ok(&2));
@@ -214,7 +214,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// fn mutate(r: &mut AsyncResult<i32, i32>) {
     ///     match r.as_mut() {
@@ -253,8 +253,8 @@ impl<T, E> AsyncResult<T, E> {
     /// Print the numbers on each line of a string multiplied by two.
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
-    /// use railgun::IntoAsync;
+    /// use railsgun::AsyncResult::{self, *};
+    /// use railsgun::IntoAsync;
     ///
     /// # async fn run() -> () {
     /// let line = "1\n2\n3\n4\n";
@@ -290,8 +290,8 @@ impl<T, E> AsyncResult<T, E> {
     /// Print the numbers on each line of a string multiplied by two.
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
-    /// use railgun::IntoAsync;
+    /// use railsgun::AsyncResult::{self, *};
+    /// use railsgun::IntoAsync;
     ///
     /// let line = "1\n2\n3\n4\n";
     ///
@@ -322,7 +322,7 @@ impl<T, E> AsyncResult<T, E> {
     /// # Examples
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// # async fn run() -> () {
     /// let x: AsyncResult<_, &str> = Ok("foo");
@@ -356,7 +356,7 @@ impl<T, E> AsyncResult<T, E> {
     /// # Examples
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<_, &str> = Ok("foo");
     /// assert_eq!(x.map_or(42, |v| v.len()), 3);
@@ -385,7 +385,7 @@ impl<T, E> AsyncResult<T, E> {
     // /// Basic usage:
     // ///
     // /// ```
-    // /// use railgun::AsyncResult::{self, *};
+    // /// use railsgun::AsyncResult::{self, *};
     // ///
     // /// # async fn run() -> () {
     // /// let k: u32 = 21;
@@ -434,7 +434,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let k = 21;
     ///
@@ -464,7 +464,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// async fn stringify(x: u32) -> String{ format!("error code: {}", x) }
     ///
@@ -499,7 +499,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// fn stringify(x: u32) -> String { format!("error code: {}", x) }
     ///
@@ -530,7 +530,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<u32, &str> = Ok(7);
     /// assert_eq!(x.iter().next(), Some(&7));
@@ -554,7 +554,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let mut x: AsyncResult<u32, &str> = Ok(7);
     /// match x.iter_mut().next() {
@@ -585,7 +585,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<u32, &str> = Ok(2);
     /// let y: AsyncResult<&str, &str> = Err("late error");
@@ -621,7 +621,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// async fn sq(x: u32) -> AsyncResult<u32, u32> { Ok(x * x) }
     /// async fn err(x: u32) -> AsyncResult<u32, u32> { Err(x) }
@@ -654,7 +654,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// fn sq(x: u32) -> AsyncResult<u32, u32> { Ok(x * x) }
     /// fn err(x: u32) -> AsyncResult<u32, u32> { Err(x) }
@@ -685,7 +685,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<u32, &str> = Ok(2);
     /// let y: AsyncResult<u32, &str> = Err("late error");
@@ -721,7 +721,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// async fn sq(x: u32) -> AsyncResult<u32, u32> { Ok(x * x) }
     /// async fn err(x: u32) -> AsyncResult<u32, u32> { Err(x) }
@@ -754,7 +754,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// fn sq(x: u32) -> AsyncResult<u32, u32> { Ok(x * x) }
     /// fn err(x: u32) -> AsyncResult<u32, u32> { Err(x) }
@@ -785,7 +785,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let default = 2;
     /// let x: AsyncResult<u32, &str> = Ok(9);
@@ -810,7 +810,7 @@ impl<T, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// async fn count(x: &str) -> usize { x.len() }
     ///
@@ -863,14 +863,14 @@ impl<T, E> AsyncResult<T, E> {
     /// # Examples
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<u32, &str> = Ok(2);
     /// assert_eq!(unsafe { x.unwrap_unchecked() }, 2);
     /// ```
     ///
     /// ```no_run
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<u32, &str> = Err("emergency failure");
     /// unsafe { x.unwrap_unchecked(); } // Undefined behavior!
@@ -899,7 +899,7 @@ impl<T, E> AsyncResult<T, E> {
     /// # Examples
     ///
     /// ```no_run
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     /// use std::future::Future;
     ///
     /// let x: AsyncResult<u32, &str> = Ok(2);
@@ -907,7 +907,7 @@ impl<T, E> AsyncResult<T, E> {
     /// ```
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<u32, &str> = Err("emergency failure");
     /// assert_eq!(unsafe { x.unwrap_err_unchecked() }, "emergency failure");
@@ -1113,7 +1113,7 @@ impl<T: Copy, E> AsyncResult<&T, E> {
     /// # Examples
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let val = 12;
     /// let x: AsyncResult<&i32, i32> = Ok(&val);
@@ -1133,7 +1133,7 @@ impl<T: Copy, E> AsyncResult<&mut T, E> {
     /// # Examples
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let mut val = 12;
     /// let x: AsyncResult<&mut i32, i32> = Ok(&mut val);
@@ -1153,7 +1153,7 @@ impl<T: Clone, E> AsyncResult<&T, E> {
     /// # Examples
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let val = 12;
     /// let x: AsyncResult<&i32, i32> = Ok(&val);
@@ -1173,7 +1173,7 @@ impl<T: Clone, E> AsyncResult<&mut T, E> {
     /// # Examples
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let mut val = 12;
     /// let x: AsyncResult<&mut i32, i32> = Ok(&mut val);
@@ -1200,7 +1200,7 @@ impl<T, E: fmt::Debug> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```should_panic
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<u32, &str> = Err("emergency failure");
     /// x.expect("Testing expect"); // panics with `Testing expect: emergency failure`
@@ -1237,13 +1237,13 @@ impl<T, E: fmt::Debug> AsyncResult<T, E> {
     ///
     /// ```
     /// let x: AsyncResult<u32, &str> = Ok(2);
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// assert_eq!(x.unwrap(), 2);
     /// ```
     ///
     /// ```should_panic
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<u32, &str> = Err("emergency failure");
     /// x.unwrap(); // panics with `emergency failure`
@@ -1272,7 +1272,7 @@ impl<T: fmt::Debug, E> AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```should_panic
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<u32, &str> = Ok(10);
     /// x.expect_err("Testing expect_err"); // panics with `Testing expect_err: 10`
@@ -1296,14 +1296,14 @@ impl<T: fmt::Debug, E> AsyncResult<T, E> {
     /// # Examples
     ///
     /// ```should_panic
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<u32, &str> = Ok(2);
     /// x.unwrap_err(); // panics with `2`
     /// ```
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<u32, &str> = Err("emergency failure");
     /// assert_eq!(x.unwrap_err(), "emergency failure");
@@ -1362,7 +1362,7 @@ impl<T: Deref, E> AsyncResult<T, E> {
     /// # Examples
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<String, u32> = Ok("hello".to_string());
     /// let y: AsyncResult<&str, &u32> = Ok("hello");
@@ -1386,7 +1386,7 @@ impl<T: DerefMut, E> AsyncResult<T, E> {
     /// # Examples
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let mut s = "HELLO".to_string();
     /// let mut x: AsyncResult<String, u32> = Ok("hello".to_string());
@@ -1412,7 +1412,7 @@ impl<T, E> AsyncResult<Option<T>, E> {
     /// # Examples
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// #[derive(Debug, Eq, PartialEq)]
     /// struct SomeErr;
@@ -1439,7 +1439,7 @@ impl<T, E> AsyncResult<AsyncResult<T, E>, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<AsyncResult<&'static str, u32>, u32> = Ok(Ok("hello"));
     /// assert_eq!(Ok("hello"), x.flatten());
@@ -1454,7 +1454,7 @@ impl<T, E> AsyncResult<AsyncResult<T, E>, E> {
     /// Flattening only removes one level of nesting at a time:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<AsyncResult<AsyncResult<&'static str, u32>, u32>, u32> = Ok(Ok(Ok("hello")));
     /// assert_eq!(Ok(Ok("hello")), x.flatten());
@@ -1483,7 +1483,7 @@ impl<T> AsyncResult<T, T> {
     /// # Examples
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let ok: AsyncResult<u32, u32> = Ok(3);
     /// let err: AsyncResult<u32, u32> = Err(4);
@@ -1544,7 +1544,7 @@ impl<T, E> IntoIterator for AsyncResult<T, E> {
     /// Basic usage:
     ///
     /// ```
-    /// use railgun::AsyncResult::{self, *};
+    /// use railsgun::AsyncResult::{self, *};
     ///
     /// let x: AsyncResult<u32, &str> = Ok(5);
     /// let v: Vec<u32> = x.into_iter().collect();

@@ -514,7 +514,7 @@ pub trait BlockInPlaceResult<T, E> {
     /// # Examples
     ///
     /// ```
-    /// use railgun::BlockInPlaceResult;
+    /// use railsgun::BlockInPlaceResult;
     /// # use tokio;
     /// # tokio::runtime::Builder::new_multi_thread()
     /// #      .worker_threads(1)
@@ -529,7 +529,7 @@ pub trait BlockInPlaceResult<T, E> {
     /// ```
     ///
     /// ```no_run
-    /// use railgun::BlockInPlaceResult;
+    /// use railsgun::BlockInPlaceResult;
     /// # use tokio;
     /// # tokio::runtime::Builder::new_multi_thread()
     /// #      .worker_threads(1)
@@ -557,7 +557,7 @@ pub trait BlockInPlaceResult<T, E> {
     /// # Examples
     ///
     /// ```no_run
-    /// use railgun::BlockInPlaceResult;
+    /// use railsgun::BlockInPlaceResult;
     /// # use tokio;
     /// # tokio::runtime::Builder::new_multi_thread()
     /// #      .worker_threads(1)
@@ -572,7 +572,7 @@ pub trait BlockInPlaceResult<T, E> {
     /// ```
     ///
     /// ```
-    /// use railgun::BlockInPlaceResult;
+    /// use railsgun::BlockInPlaceResult;
     /// # use tokio;
     /// # tokio::runtime::Builder::new_multi_thread()
     /// #      .worker_threads(1)
@@ -968,7 +968,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// use railgun::BlockInPlaceResult;
+    /// use railsgun::BlockInPlaceResult;
     ///
     /// # use tokio;
     /// # tokio::runtime::Builder::new_multi_thread()
@@ -983,7 +983,7 @@ where
     /// ```
     ///
     /// ```no_run
-    /// use railgun::BlockInPlaceResult;
+    /// use railsgun::BlockInPlaceResult;
     ///
     /// # use tokio;
     /// # tokio::runtime::Builder::new_multi_thread()
@@ -1022,7 +1022,7 @@ where
     /// # Examples
     ///
     /// ```no_run
-    /// use railgun::BlockInPlaceResult;
+    /// use railsgun::BlockInPlaceResult;
     /// # use tokio;
     /// # tokio::runtime::Builder::new_multi_thread()
     /// #      .worker_threads(1)
@@ -1037,7 +1037,7 @@ where
     /// ```
     ///
     /// ```
-    /// use railgun::BlockInPlaceResult;
+    /// use railsgun::BlockInPlaceResult;
     /// # use tokio;
     /// # tokio::runtime::Builder::new_multi_thread()
     /// #      .worker_threads(1)
