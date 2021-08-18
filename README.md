@@ -1,4 +1,5 @@
 # RailsGun
+
 RailsGun or Railgun, call it how you want it.
 This crate add a lot of small but usefull functionality to the existing
 Rail paradigm in rust.
@@ -28,19 +29,40 @@ This is for merging multiple results. If you have worked with rails
 before you have probably tried the following:
 
 ```rust
-x.and_then(|var_x|  
+use railsgun::Merge;
+
+fn func_xyz(x: u32, y: u32, z: u32) -> Result<u32,u32> {
+    Ok( x + y + z)
+}
+
+let x = Ok(1);
+let y = Ok(2);
+let z = Ok(3);
+
+x.and_then(|var_x|
     y.and_then(|var_y|
         z.and_then(|var_z|
             func_xyz(var_x, var_y, var_z)
         )
     )
-)
+).ok();
 ```
 This is a very ugly method of combining 3 results, you could
 split it out in multiple functions, but at times that is very
 excessive. Merge supplies you with a nice functionality for this.
 ```rust
-x.merge2(y, z, |var_x, var_y, var_z| func_xyz(var_x, var_y, var_z)
+use railsgun::Merge;
+
+fn func_xyz(x: u32, y: u32, z: u32) -> Result<u32,u32> {
+    Ok( x + y + z)
+}
+
+# async fn run() -> () {
+let x = Ok(1);
+let y = Ok(2);
+let z = Ok(3);
+x.merge2(y, z, |var_x, var_y, var_z| func_xyz(var_x, var_y, var_z)).ok();
+# }
 ```
 As you can see this simplifies the rail significantly and makes
 it more readable/maintainable.
@@ -53,17 +75,25 @@ interesting capabilities on top of the result.
 If the following annoys you:
 
 ```rust
-async fn my_async_fn() -> Result<&str, &str> {
-    Ok("Something awesome")
+async fn my_async_fn() -> Result<String, String> {
+    Ok("Something awesome".to_string())
 }
-my_async_fn.await.and_then(|t| println!("{}", t))
+
+# async fn run() -> () {
+my_async_fn().await.map(|t| println!("{}", t)).ok();
+# };
 ```
 This allows you to cut corners by:
 ```rust
-async fn my_async_fn() -> Result<&str, &str> {
-    Ok("Something awesome")
+use railsgun::BlockInPlaceResult;
+
+async fn my_async_fn() -> Result<String, String> {
+    Ok("Something awesome".to_string())
 }
-my_async_fn.and_then(|t| println!("{}", t))
+
+# async fn run() -> () {
+my_async_fn().map(|t| format!("{}", t)).ok();
+# };
 ```
 Please note this is using tokios `block_in_place` for execution
 
@@ -72,13 +102,21 @@ As the name describes, this is an `AsyncResult`. It has almost everything
 that a `Result` has, and some other extra features.
 This allows you to execute `async` functions and code inside your rail
 by doing the following
+
 ```rust
+use railsgun::AsyncResult::{self, *};
+
 async fn do_something(t: &str) -> AsyncResult<&str,&str> {
-    t
+    Ok(t)
 }
 
-x.and_then(|t| do_something(t)).await
-    .and_then(|t| async move { t }).await;
+# async fn run() -> () {
+let x = Ok("foo");
+
+x.async_and_then(|t| do_something(t)).await
+    .async_and_then(|t| async move { Ok(t) }).await
+    .ok();
+# };
 ```
 Of course this is not the prettiest thing, but it allows the system to
 keep to its rail and keep processing without moving in and out of the rails.
@@ -109,8 +147,17 @@ The MIT License (MIT)
 
 Copyright © 2021 <copyright holders>
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+and associated documentation files (the “Software”), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all copies or
+substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
