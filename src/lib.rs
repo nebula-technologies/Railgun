@@ -164,14 +164,18 @@
 //! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #[macro_use]
 extern crate tokio;
+#[macro_use]
+extern crate async_trait;
 mod async_result;
 mod block_in_place_result;
 mod map_iterator;
 mod merge;
 mod tap;
+mod trait_future_result;
 
 pub use async_result::{AsyncResult, IntoAsync, IntoSync};
 pub use block_in_place_result::BlockInPlaceResult;
 pub use map_iterator::ResultMapIterator;
 pub use merge::Merge;
 pub use tap::{Tap, TapErr, TapErrRef, TapRef, ThreadTap, ThreadTapErr};
+pub use trait_future_result::FutureResult;

@@ -1,5 +1,4 @@
 use core::future::Future;
-
 use core::iter::FusedIterator;
 use core::ops::{Deref, DerefMut};
 use core::{convert, fmt, hint};
