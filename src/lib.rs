@@ -104,7 +104,7 @@
 //! by doing the following
 //!
 //! ```rust
-//! use railsgun::AsyncResult::{self, *};
+//! use railsgun::{AsyncResult, Ok, Err};
 //!
 //! async fn do_something(t: &str) -> AsyncResult<&str,&str> {
 //!     Ok(t)
@@ -164,14 +164,18 @@
 //! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #[macro_use]
 extern crate tokio;
+mod async_future_result;
 mod async_result;
 mod block_in_place_result;
+mod future_result;
 mod map_iterator;
 mod merge;
 mod tap;
 
-pub use async_result::{AsyncResult, IntoAsync, IntoSync};
+pub use async_future_result::AsyncFutureResult;
+pub use async_result::{AsyncResult, Err, IntoAsync, IntoSync, Ok};
 pub use block_in_place_result::BlockInPlaceResult;
+pub use future_result::FutureResult;
 pub use map_iterator::ResultMapIterator;
 pub use merge::Merge;
 pub use tap::{Tap, TapErr, TapErrRef, TapRef, ThreadTap, ThreadTapErr};
