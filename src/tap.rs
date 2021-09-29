@@ -30,7 +30,7 @@ pub trait ThreadTapErr<T, E> {
 impl<T, E> TapRef<T, E> for Result<T, E> {
     fn tap_ref<F: FnOnce(&T)>(self, op: F) -> Result<T, E> {
         if let Ok(ref ok) = self {
-            op(&ok);
+            op(ok);
         }
         self
     }

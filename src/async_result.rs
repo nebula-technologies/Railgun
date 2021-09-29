@@ -12,11 +12,14 @@ pub struct AsyncResult<T, E> {
     inner: Result<T, E>,
 }
 
+#[allow(non_snake_case)]
 pub const fn Err<E, T>(err: E) -> AsyncResult<T, E> {
     AsyncResult {
         inner: Result::Err(err),
     }
 }
+
+#[allow(non_snake_case)]
 pub const fn Ok<E, T>(ok: T) -> AsyncResult<T, E> {
     AsyncResult {
         inner: Result::Ok(ok),
@@ -44,10 +47,7 @@ impl<T, E> AsyncResult<T, E> {
     /// assert_eq!(x.is_ok(), false);
     /// ```
     pub const fn is_ok(&self) -> bool {
-        match self.inner {
-            Result::Ok(_) => true,
-            Result::Err(_) => false,
-        }
+        self.inner.is_ok()
     }
 
     /// Returns `true` if the AsyncResult is [`Err`].
@@ -66,10 +66,7 @@ impl<T, E> AsyncResult<T, E> {
     /// assert_eq!(x.is_err(), true);
     /// ```
     pub const fn is_err(&self) -> bool {
-        match self.inner {
-            Result::Ok(_) => false,
-            Result::Err(_) => true,
-        }
+        self.inner.is_err()
     }
 
     /// Returns `true` if the AsyncResult is an [`Ok`] value containing the given value.

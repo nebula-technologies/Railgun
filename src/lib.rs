@@ -164,8 +164,6 @@
 //! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #[macro_use]
 extern crate tokio;
-#[macro_use]
-extern crate async_trait;
 mod async_result;
 mod block_in_place_result;
 mod map_iterator;

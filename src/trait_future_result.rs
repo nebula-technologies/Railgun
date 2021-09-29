@@ -1,6 +1,5 @@
 use core::pin::Pin;
 use std::future::Future;
-use std::ops::{Deref, DerefMut};
 
 pub trait FutureResult<T, E> {
     fn async_map<'a, U, F, TU>(
@@ -306,6 +305,22 @@ where
         })
     }
 
+    /// ```
+    /// use railsgun::FutureResult;
+    ///
+    /// # async fn run() {
+    /// fn func_xyz(x: u32, y: u32) -> Result<u32,u32> {
+    ///     Ok( x + y)
+    /// }
+    ///
+    /// let x = async {Ok(1u32) as Result<u32, u32>};
+    /// let y = Ok(2);
+    ///
+    /// x.async_merge(y, |var_x, var_y,| async move {func_xyz(var_x, var_y)})
+    ///     .await
+    ///     .ok();
+    /// # }
+    /// ```
     fn async_merge<'a, T1, U, FO, F>(
         self,
         res1: Result<T1, E>,
@@ -332,21 +347,27 @@ where
 #[cfg(test)]
 mod test {
     use super::FutureResult;
-    use std::future::Future;
-
-    async fn async_function() -> Result<String, String> {
-        Ok("foo".to_string())
-    }
 
     #[tokio::test]
-    async fn test_map() -> () {
-        let line = "1\n2\n3\n4\n";
+    async fn test_map() {
+        async fn async_function() -> Result<String, String> {
+            Ok("foo".to_string())
+        }
 
         async_function()
             .async_map(|t| async move { format!("Magic: {}", t) })
             .async_map(|t| async move { println!("{}", t) })
             .await
             .ok();
+    }
+
+    #[tokio::test]
+    async fn test_map_or() {
+        let x = async { Ok("foo") as Result<&str, &str> };
+        assert_eq!(x.async_map_or(42, |v| async move { v.len() }).await, 3);
+
+        let x = async { Err("bar") as Result<&str, &str> };
+        assert_eq!(x.async_map_or(42, |v| async move { v.len() }).await, 42);
     }
 
     #[tokio::test]
@@ -363,5 +384,81 @@ mod test {
             x.async_map_err(stringify).await,
             Err("error code: 13".to_string())
         );
+    }
+
+    #[tokio::test]
+    async fn test_async_and_then() {
+        async fn sq(x: u32) -> Result<u32, u32> {
+            Ok(x * x)
+        }
+        async fn err(x: u32) -> Result<u32, u32> {
+            Err(x)
+        }
+
+        assert_eq!(
+            async { Ok(2) }.async_and_then(sq).async_and_then(sq).await,
+            Ok(16)
+        );
+        assert_eq!(
+            async { Ok(2) }.async_and_then(sq).async_and_then(err).await,
+            Err(4)
+        );
+        assert_eq!(
+            async { Ok(2) }.async_and_then(err).async_and_then(sq).await,
+            Err(2)
+        );
+        assert_eq!(
+            async { Err(3) }.async_and_then(sq).async_and_then(sq).await,
+            Err(3)
+        );
+    }
+
+    #[tokio::test]
+    async fn test_async_or_else() {
+        async fn sq(x: u32) -> Result<u32, u32> {
+            Ok(x * x)
+        }
+        async fn err(x: u32) -> Result<u32, u32> {
+            Err(x)
+        }
+        assert_eq!(
+            async { Ok(2) }.async_or_else(sq).async_or_else(sq).await,
+            Ok(2)
+        );
+        assert_eq!(
+            async { Ok(2) }.async_or_else(err).async_or_else(sq).await,
+            Ok(2)
+        );
+        assert_eq!(
+            async { Err(3) }.async_or_else(sq).async_or_else(err).await,
+            Ok(9)
+        );
+        assert_eq!(
+            async { Err(3) }.async_or_else(err).async_or_else(err).await,
+            Err(3)
+        );
+    }
+
+    #[tokio::test]
+    async fn async_unwrap_or_else() {
+        async fn count(x: &str) -> usize {
+            x.len()
+        }
+        assert_eq!(async { Ok(2) }.async_unwrap_or_else(count).await, 2);
+        assert_eq!(async { Err("foo") }.async_unwrap_or_else(count).await, 3);
+    }
+
+    #[tokio::test]
+    async fn run() {
+        fn func_xyz(x: u32, y: u32) -> Result<u32, u32> {
+            Ok(x + y)
+        }
+
+        let x = async { Ok(1u32) as Result<u32, u32> };
+        let y = Ok(2);
+
+        x.async_merge(y, |var_x, var_y| async move { func_xyz(var_x, var_y) })
+            .await
+            .ok();
     }
 }
