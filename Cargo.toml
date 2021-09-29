@@ -1,6 +1,6 @@
 [package]
 name = "railsgun"
-version = "0.1.4"
+version = "1.0.1"
 authors = ["Anders Blenstrup-Pedersen <abp-git@ryuu.technology>"]
 edition = "2018"
 description = "Excessive tooling for Result handling - If you want rails you got RAILS!"
@@ -10,6 +10,15 @@ keywords = ["async", "railway", "rails", "result-ext"]
 license = "MIT"
 repository = "https://github.com/nebula-technologies/Railgun"
 
+
+
+[features]
+default = ["unstable_try"]
+unstable_try = []
+
+[dependencies]
+async-trait = "0.1.51"
+
 [dependencies.tokio]
-version = "1.10.0"
+version = "1.12.0"
 features = ["rt-multi-thread", "rt", "macros"]

@@ -225,7 +225,6 @@
 //! [`Err(E)`]: Err
 //! [`io::Error`]: ../../std/io/struct.Error.html
 
-use tokio;
 use std::future::Future;
 use std::hint;
 
@@ -606,11 +605,15 @@ where
     /// Basic usage:
     ///
     /// ```
-    /// let x: Result<u32, &str> = Ok(2);
+    /// use railsgun::BlockInPlaceResult;
+    ///
+    /// # async fn run() -> () {
+    /// let x = async {Ok(2u32) as Result<u32, &str>};
     /// assert_eq!(x.ok(), Some(2));
     ///
-    /// let x: Result<u32, &str> = Err("Nothing here");
+    /// let x = async {Err("Nothing here") as Result<u32,_>};
     /// assert_eq!(x.ok(), None);
+    /// # }
     /// ```
     #[inline]
     fn ok(self) -> Option<T> {
@@ -632,11 +635,15 @@ where
     /// Basic usage:
     ///
     /// ```
-    /// let x: Result<u32, &str> = Ok(2);
+    /// use railsgun::BlockInPlaceResult;
+    ///
+    /// # async fn run() -> () {
+    /// let x = async {Ok(2u32) as Result<u32, &str>};
     /// assert_eq!(x.err(), None);
     ///
-    /// let x: Result<u32, &str> = Err("Nothing here");
+    /// let x = async {Err("Nothing here") as Result<u32,&str>};
     /// assert_eq!(x.err(), Some("Nothing here"));
+    /// }
     /// ```
     #[inline]
     fn err(self) -> Option<E> {
@@ -662,14 +669,17 @@ where
     /// Print the numbers on each line of a string multiplied by two.
     ///
     /// ```
-    /// let line = "1\n2\n3\n4\n";
-    ///
-    /// for num in line.lines() {
-    ///     match num.parse::<i32>().map(|i| i * 2) {
-    ///         Ok(n) => println!("{}", n),
-    ///         Err(..) => {}
-    ///     }
+    /// use railsgun::BlockInPlaceResult;
+    /// async fn async_function() -> Result<String, String> {
+    ///    Ok("foo".to_string())
     /// }
+    ///
+    /// # async fn run() -> () {
+    /// async_function()
+    ///     .map(|t| { format!("Magic: {}", t) })
+    ///     .map(|t| { println!("{}", t) })
+    ///     .ok();
+    /// # }
     /// ```
     #[inline]
     fn map<U, F: FnOnce(T) -> U>(self, op: F) -> Result<U, E> {
@@ -693,11 +703,15 @@ where
     /// # Examples
     ///
     /// ```
-    /// let x: Result<_, &str> = Ok("foo");
+    /// use railsgun::BlockInPlaceResult;
+    ///
+    /// # async fn run() -> () {
+    /// let x = async {Ok("foo") as Result<&str, &str>};
     /// assert_eq!(x.map_or(42, |v| v.len()), 3);
     ///
-    /// let x: Result<&str, _> = Err("bar");
+    /// let x = async {Err("bar") as Result<&str, &str>};
     /// assert_eq!(x.map_or(42, |v| v.len()), 42);
+    /// # }
     /// ```
     #[inline]
     fn map_or<U, F: FnOnce(T) -> U>(self, default: U, f: F) -> U {
@@ -722,13 +736,17 @@ where
     /// Basic usage:
     ///
     /// ```
+    /// use railsgun::BlockInPlaceResult;
+    ///
+    /// # async fn run() -> () {
     /// let k = 21;
     ///
-    /// let x : Result<_, &str> = Ok("foo");
+    /// let x = async {Ok("foo") as Result<&str,&str>};
     /// assert_eq!(x.map_or_else(|e| k * 2, |v| v.len()), 3);
     ///
-    /// let x : Result<&str, _> = Err("bar");
+    /// let x = async {Err("bar") as Result<&str,&str>};
     /// assert_eq!(x.map_or_else(|e| k * 2, |v| v.len()), 42);
+    /// # }
     /// ```
     #[inline]
     fn map_or_else<U, D: FnOnce(E) -> U, F: FnOnce(T) -> U>(self, default: D, f: F) -> U {
@@ -752,13 +770,17 @@ where
     /// Basic usage:
     ///
     /// ```
+    /// use railsgun::BlockInPlaceResult;
+    ///
+    /// # async fn run() -> () {
     /// fn stringify(x: u32) -> String { format!("error code: {}", x) }
     ///
-    /// let x: Result<u32, u32> = Ok(2);
+    /// let x = async {Ok(2u32) as Result<u32,u32>};
     /// assert_eq!(x.map_err(stringify), Ok(2));
     ///
-    /// let x: Result<u32, u32> = Err(13);
+    /// let x = async {Err(13u32) as Result<u32,u32>};
     /// assert_eq!(x.map_err(stringify), Err("error code: 13".to_string()));
+    /// # }
     /// ```
     #[inline]
     fn map_err<F, O: FnOnce(E) -> F>(self, op: O) -> Result<T, F> {
@@ -782,21 +804,25 @@ where
     /// Basic usage:
     ///
     /// ```
-    /// let x: Result<u32, &str> = Ok(2);
+    /// use railsgun::BlockInPlaceResult;
+    ///
+    /// # async fn run() -> () {
+    /// let x = async { Ok(2u32) as Result<u32, &str>};
     /// let y: Result<&str, &str> = Err("late error");
     /// assert_eq!(x.and(y), Err("late error"));
     ///
-    /// let x: Result<u32, &str> = Err("early error");
+    /// let x = async {  Err("early error") as Result<u32, &str>};
     /// let y: Result<&str, &str> = Ok("foo");
     /// assert_eq!(x.and(y), Err("early error"));
     ///
-    /// let x: Result<u32, &str> = Err("not a 2");
+    /// let x = async {  Err("not a 2") as Result<u32, &str>};
     /// let y: Result<&str, &str> = Err("late error");
     /// assert_eq!(x.and(y), Err("not a 2"));
     ///
-    /// let x: Result<u32, &str> = Ok(2);
+    /// let x = async {  Ok(2u32) as Result<u32, &str>};
     /// let y: Result<&str, &str> = Ok("different result type");
     /// assert_eq!(x.and(y), Ok("different result type"));
+    /// # }
     /// ```
     #[inline]
     fn and<U>(self, res: Result<U, E>) -> Result<U, E> {
@@ -818,13 +844,17 @@ where
     /// Basic usage:
     ///
     /// ```
+    /// use railsgun::BlockInPlaceResult;
+    ///
+    /// # async fn run() -> () {
     /// fn sq(x: u32) -> Result<u32, u32> { Ok(x * x) }
     /// fn err(x: u32) -> Result<u32, u32> { Err(x) }
     ///
-    /// assert_eq!(Ok(2).and_then(sq).and_then(sq), Ok(16));
-    /// assert_eq!(Ok(2).and_then(sq).and_then(err), Err(4));
-    /// assert_eq!(Ok(2).and_then(err).and_then(sq), Err(2));
-    /// assert_eq!(Err(3).and_then(sq).and_then(sq), Err(3));
+    /// assert_eq!(async {Ok(2u32) as Result<u32,u32>}.and_then(sq).and_then(sq), Ok(16));
+    /// assert_eq!(async {Ok(2u32) as Result<u32,u32>}.and_then(sq).and_then(err), Err(4));
+    /// assert_eq!(async {Ok(2u32) as Result<u32,u32>}.and_then(err).and_then(sq), Err(2));
+    /// assert_eq!(async {Err(3u32) as Result<u32,u32>}.and_then(sq).and_then(sq), Err(3));
+    /// # }
     /// ```
     #[inline]
     fn and_then<U, F: FnOnce(T) -> Result<U, E>>(self, op: F) -> Result<U, E> {
@@ -849,21 +879,25 @@ where
     /// Basic usage:
     ///
     /// ```
-    /// let x: Result<u32, &str> = Ok(2);
+    /// use railsgun::BlockInPlaceResult;
+    ///
+    /// # async fn run() {
+    /// let x = async {Ok(2u32) as Result<u32,&str>};
     /// let y: Result<u32, &str> = Err("late error");
     /// assert_eq!(x.or(y), Ok(2));
     ///
-    /// let x: Result<u32, &str> = Err("early error");
+    /// let x = async {Err("early error") as Result<u32,&str>};
     /// let y: Result<u32, &str> = Ok(2);
     /// assert_eq!(x.or(y), Ok(2));
     ///
-    /// let x: Result<u32, &str> = Err("not a 2");
+    /// let x = async {Err("not a 2") as Result<u32,&str>};
     /// let y: Result<u32, &str> = Err("late error");
     /// assert_eq!(x.or(y), Err("late error"));
     ///
-    /// let x: Result<u32, &str> = Ok(2);
+    /// let x = async {Ok(2u32) as Result<u32,&str>};
     /// let y: Result<u32, &str> = Ok(100);
     /// assert_eq!(x.or(y), Ok(2));
+    /// # }
     /// ```
     #[inline]
     fn or<F>(self, res: Result<T, F>) -> Result<T, F> {
@@ -885,13 +919,17 @@ where
     /// Basic usage:
     ///
     /// ```
+    /// use railsgun::BlockInPlaceResult;
+    ///
+    /// # async fn run() {
     /// fn sq(x: u32) -> Result<u32, u32> { Ok(x * x) }
     /// fn err(x: u32) -> Result<u32, u32> { Err(x) }
     ///
-    /// assert_eq!(Ok(2).or_else(sq).or_else(sq), Ok(2));
-    /// assert_eq!(Ok(2).or_else(err).or_else(sq), Ok(2));
-    /// assert_eq!(Err(3).or_else(sq).or_else(err), Ok(9));
-    /// assert_eq!(Err(3).or_else(err).or_else(err), Err(3));
+    /// assert_eq!(async {Ok(2u32) as Result<u32,u32>}.or_else(sq).or_else(sq), Ok(2));
+    /// assert_eq!(async {Ok(2u32) as Result<u32,u32>}.or_else(err).or_else(sq), Ok(2));
+    /// assert_eq!(async {Err(3u32) as Result<u32,u32>}.or_else(sq).or_else(err), Ok(9));
+    /// assert_eq!(async {Err(3u32) as Result<u32,u32>}.or_else(err).or_else(err), Err(3));
+    /// # }
     /// ```
     #[inline]
     fn or_else<F, O: FnOnce(E) -> Result<T, F>>(self, op: O) -> Result<T, F> {
@@ -916,12 +954,17 @@ where
     /// Basic usage:
     ///
     /// ```
+    /// use railsgun::BlockInPlaceResult;
+    ///
+    /// # async fn run() {
     /// let default = 2;
-    /// let x: Result<u32, &str> = Ok(9);
+    /// let x = async {Ok(9u32) as Result<u32, &str>};
     /// assert_eq!(x.unwrap_or(default), 9);
     ///
-    /// let x: Result<u32, &str> = Err("error");
+    ///
+    /// let x = async {Err("error") as Result<u32, &str>};
     /// assert_eq!(x.unwrap_or(default), default);
+    /// # }
     /// ```
     #[inline]
     fn unwrap_or(self, default: T) -> T {
@@ -941,10 +984,14 @@ where
     /// Basic usage:
     ///
     /// ```
-    /// fn count(x: &str) -> usize { x.len() }
+    /// use railsgun::BlockInPlaceResult;
     ///
-    /// assert_eq!(Ok(2).unwrap_or_else(count), 2);
-    /// assert_eq!(Err("foo").unwrap_or_else(count), 3);
+    /// # async fn run() {
+    /// fn count(x: &str) -> u32 { x.len() as u32 }
+    ///
+    /// assert_eq!(async {Ok(2u32) as Result<u32, &str>}.unwrap_or_else(count), 2);
+    /// assert_eq!(async {Err("foo") as Result<u32, &str>}.unwrap_or_else(count), 3);
+    /// # }
     /// ```
     #[inline]
     fn unwrap_or_else<F: FnOnce(E) -> T>(self, op: F) -> T {
@@ -970,31 +1017,18 @@ where
     /// ```
     /// use railsgun::BlockInPlaceResult;
     ///
-    /// # use tokio;
-    /// # tokio::runtime::Builder::new_multi_thread()
-    /// #      .worker_threads(1)
-    /// #      .thread_name("rocket-worker-thread")
-    /// #      .enable_all()
-    /// #      .build()
-    /// #      .expect("create tokio runtime")
-    /// #      .block_on(async {
-    /// assert_eq!(unsafe { async {Ok(2) as Result<_, &str>}.unwrap_unchecked() }, 2);
-    /// # });
+    ///
+    /// # async fn run() {
+    /// assert_eq!(unsafe { async {Ok(2u32) as Result<u32, &str>}.unwrap_unchecked() }, 2);
+    /// # }
     /// ```
     ///
     /// ```no_run
     /// use railsgun::BlockInPlaceResult;
     ///
-    /// # use tokio;
-    /// # tokio::runtime::Builder::new_multi_thread()
-    /// #      .worker_threads(1)
-    /// #      .thread_name("rocket-worker-thread")
-    /// #      .enable_all()
-    /// #      .build()
-    /// #      .expect("create tokio runtime")
-    /// #      .block_on(async {
-    /// unsafe { async {Err("emergency failure") as Result<u32, _>}.unwrap_unchecked(); } // Undefined behavior!
-    /// # });
+    /// # async fn run() {
+    /// unsafe { async {Err("emergency failure") as Result<u32, &str>}.unwrap_unchecked(); } // Undefined behavior!
+    /// # }
     /// ```
     #[inline]
     #[track_caller]
@@ -1023,32 +1057,18 @@ where
     ///
     /// ```no_run
     /// use railsgun::BlockInPlaceResult;
-    /// # use tokio;
-    /// # tokio::runtime::Builder::new_multi_thread()
-    /// #      .worker_threads(1)
-    /// #      .thread_name("rocket-worker-thread")
-    /// #      .enable_all()
-    /// #      .build()
-    /// #      .expect("create tokio runtime")
-    /// #      .block_on(async {
     ///
+    /// # async fn run() {
     /// unsafe { async {Ok(2) as Result<_, &str>}.unwrap_err_unchecked() }; // Undefined behavior!
-    /// # });
+    /// # }
     /// ```
     ///
     /// ```
     /// use railsgun::BlockInPlaceResult;
-    /// # use tokio;
-    /// # tokio::runtime::Builder::new_multi_thread()
-    /// #      .worker_threads(1)
-    /// #      .thread_name("rocket-worker-thread")
-    /// #      .enable_all()
-    /// #      .build()
-    /// #      .expect("create tokio runtime")
-    /// #      .block_on(async {
     ///
+    /// # async fn run() {
     /// assert_eq!(unsafe { async {Err("emergency failure") as Result<u32, _>}.unwrap_err_unchecked() }, "emergency failure");
-    /// # });
+    /// # }
     /// ```
     #[inline]
     #[track_caller]
@@ -1069,4 +1089,215 @@ fn async_handle<U, F: Future<Output = U>>(future: F) -> U {
     use tokio::runtime::Handle;
     use tokio::task;
     task::block_in_place(move || Handle::current().block_on(future))
+}
+
+#[cfg(test)]
+mod test {
+    use crate::BlockInPlaceResult;
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_ok() {
+        let x = async { Ok(2u32) as Result<u32, &str> };
+        assert_eq!(x.ok(), Some(2));
+
+        let x = async { Err("Nothing here") as Result<u32, _> };
+        assert_eq!(x.ok(), None);
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_err() {
+        let x = async { Ok(2u32) as Result<u32, &str> };
+        assert_eq!(x.err(), None);
+
+        let x = async { Err("Nothing here") as Result<u32, &str> };
+        assert_eq!(x.err(), Some("Nothing here"));
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_map() -> () {
+        async fn async_function() -> Result<String, String> {
+            Ok("foo".to_string())
+        }
+        async_function()
+            .map(|t| format!("Magic: {}", t))
+            .map(|t| println!("{}", t))
+            .ok();
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn map_or() -> () {
+        let x = async { Ok("foo") as Result<&str, &str> };
+        assert_eq!(x.map_or(42, |v| v.len()), 3);
+
+        let x = async { Err("bar") as Result<&str, &str> };
+        assert_eq!(x.map_or(42, |v| v.len()), 42);
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn map_or_else() -> () {
+        let k = 21;
+
+        let x = async { Ok("foo") as Result<&str, &str> };
+        assert_eq!(x.map_or_else(|e| k * 2, |v| v.len()), 3);
+
+        let x = async { Err("bar") as Result<&str, &str> };
+        assert_eq!(x.map_or_else(|e| k * 2, |v| v.len()), 42);
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_map_err() -> () {
+        fn stringify(x: u32) -> String {
+            format!("error code: {}", x)
+        }
+
+        let x = async { Ok(2u32) as Result<u32, u32> };
+        assert_eq!(x.map_err(stringify), Ok(2));
+
+        let x = async { Err(13u32) as Result<u32, u32> };
+        assert_eq!(x.map_err(stringify), Err("error code: 13".to_string()));
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_and() -> () {
+        let x = async { Ok(2u32) as Result<u32, &str> };
+        let y: Result<&str, &str> = Err("late error");
+        assert_eq!(x.and(y), Err("late error"));
+
+        let x = async { Err("early error") as Result<u32, &str> };
+        let y: Result<&str, &str> = Ok("foo");
+        assert_eq!(x.and(y), Err("early error"));
+
+        let x = async { Err("not a 2") as Result<u32, &str> };
+        let y: Result<&str, &str> = Err("late error");
+        assert_eq!(x.and(y), Err("not a 2"));
+
+        let x = async { Ok(2u32) as Result<u32, &str> };
+        let y: Result<&str, &str> = Ok("different result type");
+        assert_eq!(x.and(y), Ok("different result type"));
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_and_then() -> () {
+        fn sq(x: u32) -> Result<u32, u32> {
+            Ok(x * x)
+        }
+        fn err(x: u32) -> Result<u32, u32> {
+            Err(x)
+        }
+
+        assert_eq!(
+            async { Ok(2u32) as Result<u32, u32> }
+                .and_then(sq)
+                .and_then(sq),
+            Ok(16)
+        );
+        assert_eq!(
+            async { Ok(2u32) as Result<u32, u32> }
+                .and_then(sq)
+                .and_then(err),
+            Err(4)
+        );
+        assert_eq!(
+            async { Ok(2u32) as Result<u32, u32> }
+                .and_then(err)
+                .and_then(sq),
+            Err(2)
+        );
+        assert_eq!(
+            async { Err(3u32) as Result<u32, u32> }
+                .and_then(sq)
+                .and_then(sq),
+            Err(3)
+        );
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_or() {
+        let x = async { Ok(2u32) as Result<u32, &str> };
+        let y: Result<u32, &str> = Err("late error");
+        assert_eq!(x.or(y), Ok(2));
+
+        let x = async { Err("early error") as Result<u32, &str> };
+        let y: Result<u32, &str> = Ok(2);
+        assert_eq!(x.or(y), Ok(2));
+
+        let x = async { Err("not a 2") as Result<u32, &str> };
+        let y: Result<u32, &str> = Err("late error");
+        assert_eq!(x.or(y), Err("late error"));
+
+        let x = async { Ok(2u32) as Result<u32, &str> };
+        let y: Result<u32, &str> = Ok(100);
+        assert_eq!(x.or(y), Ok(2));
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_or_else() {
+        fn sq(x: u32) -> Result<u32, u32> {
+            Ok(x * x)
+        }
+        fn err(x: u32) -> Result<u32, u32> {
+            Err(x)
+        }
+
+        assert_eq!(
+            async { Ok(2u32) as Result<u32, u32> }
+                .or_else(sq)
+                .or_else(sq),
+            Ok(2)
+        );
+        assert_eq!(
+            async { Ok(2u32) as Result<u32, u32> }
+                .or_else(err)
+                .or_else(sq),
+            Ok(2)
+        );
+        assert_eq!(
+            async { Err(3u32) as Result<u32, u32> }
+                .or_else(sq)
+                .or_else(err),
+            Ok(9)
+        );
+        assert_eq!(
+            async { Err(3u32) as Result<u32, u32> }
+                .or_else(err)
+                .or_else(err),
+            Err(3)
+        );
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_unwrap_or() {
+        let default = 2;
+        let x = async { Ok(9u32) as Result<u32, &str> };
+        assert_eq!(x.unwrap_or(default), 9);
+
+        let x = async { Err("error") as Result<u32, &str> };
+        assert_eq!(x.unwrap_or(default), default);
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_unwrap_or_else() {
+        fn count(x: &str) -> usize {
+            x.len()
+        }
+
+        assert_eq!(Ok(2).unwrap_or_else(count), 2);
+        assert_eq!(Err("foo").unwrap_or_else(count), 3);
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_unwrap_unchecked() {
+        assert_eq!(
+            unsafe { async { Ok(2u32) as Result<u32, &str> }.unwrap_unchecked() },
+            2
+        )
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_unwrap_err_unchecked() {
+        assert_eq!(
+            unsafe { async { Err("emergency failure") as Result<u32, _> }.unwrap_err_unchecked() },
+            "emergency failure"
+        );
+    }
 }
