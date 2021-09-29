@@ -104,7 +104,7 @@
 //! by doing the following
 //!
 //! ```rust
-//! use railsgun::AsyncResult::{self, *};
+//! use railsgun::{AsyncResult, Ok, Err};
 //!
 //! async fn do_something(t: &str) -> AsyncResult<&str,&str> {
 //!     Ok(t)
@@ -173,7 +173,7 @@ mod merge;
 mod tap;
 mod trait_future_result;
 
-pub use async_result::{AsyncResult, IntoAsync, IntoSync};
+pub use async_result::{AsyncResult, Err, IntoAsync, IntoSync, Ok};
 pub use block_in_place_result::BlockInPlaceResult;
 pub use map_iterator::ResultMapIterator;
 pub use merge::Merge;
