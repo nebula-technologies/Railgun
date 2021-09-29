@@ -47,28 +47,26 @@ pub trait FutureResult<T, E> {
     ) -> Pin<Box<dyn Future<Output = Result<T, F>> + Send + 'a>>
     where
         Self: 'a,
-        O: 'a + FnOnce(T) -> EO + Send,
+        O: 'a + FnOnce(E) -> EO + Send,
         EO: Future<Output = Result<T, F>> + Send;
 
-    fn async_unwrap_or_else<TO: Future<Output = T>, F: FnOnce(E) -> TO>(self, op: F) -> T {
-        match self.inner {
-            Result::Ok(t) => t,
-            Result::Err(e) => op(e).await,
-        }
-    }
+    fn async_unwrap_or_else<'a, TO, F>(self, op: F) -> Pin<Box<dyn Future<Output = T> + Send + 'a>>
+    where
+        Self: 'a,
+        TO: Future<Output = T> + Send,
+        F: 'a + FnOnce(E) -> TO + Send;
 
-    fn async_merge<
-        T1,
-        U,
-        FO: Future<Output = Result<U, E>>,
-        F: FnOnce(T, T1) -> FO,
-    >(
+    fn async_merge<'a, T1, U, FO, F>(
         self,
         res1: Result<T1, E>,
         op: F,
-    )where
-        FO: 'a + Future<Output = Result<U, E>> +Send;
-    }
+    ) -> Pin<Box<dyn Future<Output = Result<U, E>> + Send + 'a>>
+    where
+        Self: 'a,
+        E: 'a,
+        FO: Future<Output = Result<U, E>> + Send,
+        F: 'a + FnOnce(T, T1) -> FO + Send,
+        T1: 'a + Send;
 }
 
 impl<T: Send, E: Send, L> FutureResult<T, E> for L
@@ -195,6 +193,137 @@ where
             match self.await {
                 Ok(t) => Ok(t),
                 Err(e) => Err(op(e).await),
+            }
+        })
+    }
+
+    /// Calls `op` if the AsyncResult is [`Ok`], otherwise returns the [`Err`] value of `self`.
+    ///
+    ///
+    /// This function can be used for control flow based on `AsyncResult` values.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// # use std::future::Future;
+    /// use railsgun::FutureResult;
+    ///
+    /// # async fn run() -> () {
+    ///
+    /// async fn sq(x: u32) -> Result<u32, u32> { Ok(x * x) }
+    /// async fn err(x: u32) -> Result<u32, u32> { Err(x) }
+    ///
+    /// assert_eq!(async{Ok(2)}.async_and_then(sq).async_and_then(sq).await, Ok(16));
+    /// assert_eq!(async{Ok(2)}.async_and_then(sq).async_and_then(err).await, Err(4));
+    /// assert_eq!(async{Ok(2)}.async_and_then(err).async_and_then(sq).await, Err(2));
+    /// assert_eq!(async{Err(3)}.async_and_then(sq).async_and_then(sq).await, Err(3));
+    /// # }
+    /// ```
+    fn async_and_then<'a, U, F, FO>(
+        self,
+        op: F,
+    ) -> Pin<Box<dyn Future<Output = Result<U, E>> + Send + 'a>>
+    where
+        Self: 'a,
+        F: 'a + FnOnce(T) -> FO + Send,
+        FO: Future<Output = Result<U, E>> + Send,
+    {
+        Box::pin(async move {
+            match self.await {
+                Ok(t) => op(t).await,
+                Err(e) => Err(e),
+            }
+        })
+    }
+    /// Calls `op` if the AsyncResult is [`Err`], otherwise returns the [`Ok`] value of `self`.
+    ///
+    /// This function can be used for control flow based on AsyncResult values.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use railsgun::FutureResult;
+    ///
+    /// async fn sq(x: u32) -> Result<u32, u32> { Ok(x * x) }
+    /// async fn err(x: u32) -> Result<u32, u32> { Err(x) }
+    ///
+    /// # async fn run() -> () {
+    /// assert_eq!(async{Ok(2)}.async_or_else(sq).async_or_else(sq).await, Ok(2));
+    /// assert_eq!(async{Ok(2)}.async_or_else(err).async_or_else(sq).await, Ok(2));
+    /// assert_eq!(async{Err(3)}.async_or_else(sq).async_or_else(err).await, Ok(9));
+    /// assert_eq!(async{Err(3)}.async_or_else(err).async_or_else(err).await, Err(3));
+    /// # }
+    /// ```
+    fn async_or_else<'a, F, EO, O>(
+        self,
+        op: O,
+    ) -> Pin<Box<dyn Future<Output = Result<T, F>> + Send + 'a>>
+    where
+        Self: 'a,
+        O: 'a + FnOnce(E) -> EO + Send,
+        EO: Future<Output = Result<T, F>> + Send,
+    {
+        Box::pin(async move {
+            match self.await {
+                Ok(t) => Ok(t),
+                Err(e) => op(e).await,
+            }
+        })
+    }
+    /// Returns the contained [`Ok`] value or computes it from a closure.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use railsgun::FutureResult;
+    ///
+    /// async fn count(x: &str) -> usize { x.len() }
+    ///
+    /// # async fn run() -> () {
+    /// assert_eq!(async{Ok(2)}.async_unwrap_or_else(count).await, 2);
+    /// assert_eq!(async{Err("foo")}.async_unwrap_or_else(count).await, 3);
+    /// # }
+    /// ```
+    fn async_unwrap_or_else<'a, TO, F>(self, op: F) -> Pin<Box<dyn Future<Output = T> + Send + 'a>>
+    where
+        Self: 'a,
+        TO: Future<Output = T> + Send,
+        F: 'a + FnOnce(E) -> TO + Send,
+    {
+        Box::pin(async move {
+            match self.await {
+                Ok(t) => t,
+                Err(e) => op(e).await,
+            }
+        })
+    }
+
+    fn async_merge<'a, T1, U, FO, F>(
+        self,
+        res1: Result<T1, E>,
+        op: F,
+    ) -> Pin<Box<dyn Future<Output = Result<U, E>> + Send + 'a>>
+    where
+        Self: 'a,
+        E: 'a,
+        FO: Future<Output = Result<U, E>> + Send,
+        F: 'a + FnOnce(T, T1) -> FO + Send,
+        T1: 'a + Send,
+    {
+        Box::pin(async move {
+            match (self.await, res1) {
+                (Ok(t), Ok(t1)) => op(t, t1).await,
+                (Err(e), Ok(_t1)) => Err(e),
+                (Ok(_t), Err(e1)) => Err(e1),
+                (Err(e), Err(_e1)) => Err(e),
             }
         })
     }
