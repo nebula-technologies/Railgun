@@ -1,7 +1,8 @@
+use crate::FutureResult;
 use core::pin::Pin;
 use std::future::Future;
 
-pub trait FutureResult<T, E> {
+pub trait AsyncFutureResult<T, E>: FutureResult<T, E> {
     fn async_map<'a, U, F, TU>(
         self,
         op: F,
@@ -68,7 +69,7 @@ pub trait FutureResult<T, E> {
         T1: 'a + Send;
 }
 
-impl<T: Send, E: Send, L> FutureResult<T, E> for L
+impl<T: Send, E: Send, L> AsyncFutureResult<T, E> for L
 where
     L: Future<Output = Result<T, E>> + Send,
 {
@@ -82,7 +83,7 @@ where
     /// Print the numbers on each line of a string multiplied by two.
     ///
     /// ```
-    /// use railsgun::FutureResult;
+    /// use railsgun::AsyncFutureResult;
     /// async fn async_function() -> Result<String, String> {
     ///    Ok("foo".to_string())
     /// }
@@ -104,12 +105,7 @@ where
         F: 'a + (FnOnce(T) -> TU) + Send,
         TU: Future<Output = U> + Send,
     {
-        Box::pin(async move {
-            match self.await {
-                Ok(t) => Ok(op(t).await),
-                Err(e) => Err(e),
-            }
-        })
+        self.map(op)
     }
 
     /// Applies a function to the contained value (if [`Ok`]),
@@ -125,7 +121,7 @@ where
     ///
     /// ```
     /// # use std::future::Future;
-    /// use railsgun::FutureResult;
+    /// use railsgun::AsyncFutureResult;
     ///
     ///  async fn run() -> () {
     /// let x = async {Ok("foo") as Result<&str, &str>};
@@ -147,12 +143,7 @@ where
         UO: Future<Output = U> + Send,
         U: 'a + Send,
     {
-        Box::pin(async {
-            match self.await {
-                Ok(t) => f(t).await,
-                Err(_) => default,
-            }
-        })
+        self.map_or(default, f)
     }
 
     /// Maps a `AsyncResult<T, E>` to `AsyncResult<T, F>` by applying a function to a
@@ -168,7 +159,7 @@ where
     ///
     /// ```
     /// # use std::future::Future;
-    /// use railsgun::FutureResult;
+    /// use railsgun::AsyncFutureResult;
     /// async fn stringify(x: i32) -> String{ format!("error code: {}", x) }
     ///
     /// # async fn run() -> () {
@@ -188,12 +179,7 @@ where
         O: 'a + FnOnce(E) -> UO + Send,
         UO: Future<Output = F> + Send,
     {
-        Box::pin(async move {
-            match self.await {
-                Ok(t) => Ok(t),
-                Err(e) => Err(op(e).await),
-            }
-        })
+        self.map_err(op)
     }
 
     /// Calls `op` if the AsyncResult is [`Ok`], otherwise returns the [`Err`] value of `self`.
@@ -207,7 +193,7 @@ where
     ///
     /// ```
     /// # use std::future::Future;
-    /// use railsgun::FutureResult;
+    /// use railsgun::AsyncFutureResult;
     ///
     /// # async fn run() -> () {
     ///
@@ -229,12 +215,7 @@ where
         F: 'a + FnOnce(T) -> FO + Send,
         FO: Future<Output = Result<U, E>> + Send,
     {
-        Box::pin(async move {
-            match self.await {
-                Ok(t) => op(t).await,
-                Err(e) => Err(e),
-            }
-        })
+        self.and_then(op)
     }
     /// Calls `op` if the AsyncResult is [`Err`], otherwise returns the [`Ok`] value of `self`.
     ///
@@ -246,7 +227,7 @@ where
     /// Basic usage:
     ///
     /// ```
-    /// use railsgun::FutureResult;
+    /// use railsgun::AsyncFutureResult;
     ///
     /// async fn sq(x: u32) -> Result<u32, u32> { Ok(x * x) }
     /// async fn err(x: u32) -> Result<u32, u32> { Err(x) }
@@ -267,12 +248,7 @@ where
         O: 'a + FnOnce(E) -> EO + Send,
         EO: Future<Output = Result<T, F>> + Send,
     {
-        Box::pin(async move {
-            match self.await {
-                Ok(t) => Ok(t),
-                Err(e) => op(e).await,
-            }
-        })
+        self.or_else(op)
     }
     /// Returns the contained [`Ok`] value or computes it from a closure.
     ///
@@ -282,7 +258,7 @@ where
     /// Basic usage:
     ///
     /// ```
-    /// use railsgun::FutureResult;
+    /// use railsgun::AsyncFutureResult;
     ///
     /// async fn count(x: &str) -> usize { x.len() }
     ///
@@ -297,16 +273,11 @@ where
         TO: Future<Output = T> + Send,
         F: 'a + FnOnce(E) -> TO + Send,
     {
-        Box::pin(async move {
-            match self.await {
-                Ok(t) => t,
-                Err(e) => op(e).await,
-            }
-        })
+        self.unwrap_or_else(op)
     }
 
     /// ```
-    /// use railsgun::FutureResult;
+    /// use railsgun::AsyncFutureResult;
     ///
     /// # async fn run() {
     /// fn func_xyz(x: u32, y: u32) -> Result<u32,u32> {
@@ -333,20 +304,13 @@ where
         F: 'a + FnOnce(T, T1) -> FO + Send,
         T1: 'a + Send,
     {
-        Box::pin(async move {
-            match (self.await, res1) {
-                (Ok(t), Ok(t1)) => op(t, t1).await,
-                (Err(e), Ok(_t1)) => Err(e),
-                (Ok(_t), Err(e1)) => Err(e1),
-                (Err(e), Err(_e1)) => Err(e),
-            }
-        })
+        self.merge(res1, op)
     }
 }
 
 #[cfg(test)]
 mod test {
-    use super::FutureResult;
+    use crate::AsyncFutureResult;
 
     #[tokio::test]
     async fn test_map() {
