@@ -175,7 +175,7 @@ mod tap;
 pub use async_future_result::AsyncFutureResult;
 pub use async_result::{AsyncResult, Err, IntoAsync, IntoSync, Ok};
 pub use block_in_place_result::BlockInPlaceResult;
-pub use future_result::FutureResult;
+pub use future_result::{AsFutureResult, FutureResult};
 pub use map_iterator::ResultMapIterator;
 pub use merge::Merge;
 pub use tap::{Tap, TapErr, TapErrRef, TapRef, ThreadTap, ThreadTapErr};
