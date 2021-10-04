@@ -10,12 +10,6 @@ keywords = ["async", "railway", "rails", "result-ext"]
 license = "MIT"
 repository = "https://github.com/nebula-technologies/Railgun"
 
-
-
-[features]
-default = ["unstable_try"]
-unstable_try = []
-
 [dependencies]
 async-trait = "0.1.51"
 
