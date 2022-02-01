@@ -8,8 +8,6 @@ include:
 - project: ci-cd/rust
   ref: master
   file: collections/complete.yml
-- template: Dependency-Scanning.gitlab-ci.yml
 - project: ci-cd/rust
   ref: master
   file: deploy/publish.yml
-- template: Auto-DevOps.gitlab-ci.yml
