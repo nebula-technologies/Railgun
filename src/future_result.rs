@@ -136,6 +136,7 @@ where
     ///     .ok();
     /// # }
     /// ```
+    #[inline]
     fn map<'a, U, F, TU>(self, op: F) -> Pin<Box<dyn Future<Output = Result<U, E>> + Send + 'a>>
     where
         Self: 'a,
@@ -213,6 +214,7 @@ where
     /// assert_eq!(x.map_err(stringify).await, Err("error code: 13".to_string()));
     /// # }
     /// ```
+    #[inline]
     fn map_err<'a, F, UO, O>(self, op: O) -> Pin<Box<dyn Future<Output = Result<T, F>> + Send + 'a>>
     where
         Self: 'a,
@@ -251,6 +253,7 @@ where
     /// assert_eq!(async{Err(3)}.and_then(sq).and_then(sq).await, Err(3));
     /// # }
     /// ```
+    #[inline]
     fn and_then<'a, U, F, FO>(
         self,
         op: F,
@@ -289,6 +292,7 @@ where
     /// assert_eq!(async{Err(3)}.or_else(err).or_else(err).await, Err(3));
     /// # }
     /// ```
+    #[inline]
     fn or_else<'a, F, EO, O>(self, op: O) -> Pin<Box<dyn Future<Output = Result<T, F>> + Send + 'a>>
     where
         Self: 'a,
@@ -319,7 +323,8 @@ where
     /// assert_eq!(async{Err("foo")}.unwrap_or_else(count).await, 3);
     /// # }
     /// ```
-    fn unwrap_or_else<'a, TO, F>(self, op: F) -> Pin<Box<dyn Future<Output = T> + Send + 'a>>
+    #[inline]
+    fn   unwrap_or_else<'a, TO, F>(self, op: F) -> Pin<Box<dyn Future<Output = T> + Send + 'a>>
     where
         Self: 'a,
         TO: Future<Output = T> + Send,
@@ -361,7 +366,8 @@ where
     ///
     /// # }
     /// ```
-    fn merge<'a, T1, U, FO, F>(
+    #[inline]
+    fn   merge<'a, T1, U, FO, F>(
         self,
         res1: Result<T1, E>,
         op: F,
@@ -402,7 +408,8 @@ where
     ///     .await.unwrap(), 5u32);
     /// # }
     /// ```
-    fn merge2<'a, T1, T2, U, FO, F>(
+    #[inline]
+    fn   merge2<'a, T1, T2, U, FO, F>(
         self,
         res1: Result<T1, E>,
         res2: Result<T2, E>,
@@ -448,7 +455,8 @@ where
     ///     .unwrap(), 7u32);
     /// # }
     /// ```
-    fn merge3<'a, T1, T2, T3, U, FO, F>(
+    #[inline]
+    fn   merge3<'a, T1, T2, T3, U, FO, F>(
         self,
         res1: Result<T1, E>,
         res2: Result<T2, E>,
@@ -498,7 +506,8 @@ where
     ///     .unwrap(), 9u32);
     /// # }
     /// ```
-    fn merge4<'a, T1, T2, T3, T4, U, FO, F>(
+    #[inline]
+    fn   merge4<'a, T1, T2, T3, T4, U, FO, F>(
         self,
         res1: Result<T1, E>,
         res2: Result<T2, E>,

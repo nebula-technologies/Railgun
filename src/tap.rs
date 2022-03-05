@@ -28,7 +28,8 @@ pub trait ThreadTapErr<T, E> {
 }
 
 impl<T, E> TapRef<T, E> for Result<T, E> {
-    fn tap_ref<F: FnOnce(&T)>(self, op: F) -> Result<T, E> {
+    #[inline]
+    fn   tap_ref<F: FnOnce(&T)>(self, op: F) -> Result<T, E> {
         if let Ok(ref ok) = self {
             op(ok);
         }
@@ -37,7 +38,8 @@ impl<T, E> TapRef<T, E> for Result<T, E> {
 }
 
 impl<T: Clone, E> TapClone<T, E> for Result<T, E> {
-    fn tap<F: FnOnce(T)>(self, op: F) -> Result<T, E> {
+    #[inline]
+    fn   tap<F: FnOnce(T)>(self, op: F) -> Result<T, E> {
         if let Ok(ref ok) = self {
             op(ok.clone());
         }
@@ -46,7 +48,8 @@ impl<T: Clone, E> TapClone<T, E> for Result<T, E> {
 }
 
 impl<T, E: std::clone::Clone> TapErr<T, E> for Result<T, E> {
-    fn tap_err<F: FnOnce(E)>(self, op: F) -> Result<T, E> {
+    #[inline]
+    fn   tap_err<F: FnOnce(E)>(self, op: F) -> Result<T, E> {
         if let Err(ref err) = self {
             op(err.clone());
         }
@@ -55,7 +58,8 @@ impl<T, E: std::clone::Clone> TapErr<T, E> for Result<T, E> {
 }
 
 impl<T, E> TapErrRef<T, E> for Result<T, E> {
-    fn tap_err_ref<F: FnOnce(&E)>(self, op: F) -> Result<T, E> {
+    #[inline]
+    fn   tap_err_ref<F: FnOnce(&E)>(self, op: F) -> Result<T, E> {
         if let Err(ref err) = self {
             op(err);
         }
@@ -64,7 +68,8 @@ impl<T, E> TapErrRef<T, E> for Result<T, E> {
 }
 
 impl<T: 'static + Clone + Send, E> ThreadTap<T, E> for Result<T, E> {
-    fn thread_tap<'a, F: 'static + FnOnce(T) + Send>(self, op: F) -> Result<T, E> {
+    #[inline]
+    fn   thread_tap<'a, F: 'static + FnOnce(T) + Send>(self, op: F) -> Result<T, E> {
         match self {
             Ok(ok) => {
                 let new_ok = ok.clone();
@@ -77,7 +82,8 @@ impl<T: 'static + Clone + Send, E> ThreadTap<T, E> for Result<T, E> {
 }
 
 impl<T, E: 'static + Clone + Send> ThreadTapErr<T, E> for Result<T, E> {
-    fn thread_tap_err<F: 'static + FnOnce(E) + Send>(self, op: F) -> Result<T, E> {
+    #[inline]
+    fn   thread_tap_err<F: 'static + FnOnce(E) + Send>(self, op: F) -> Result<T, E> {
         match self {
             Err(err) => {
                 let new_err = err.clone();
