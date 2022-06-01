@@ -1658,7 +1658,6 @@ impl<T, E> DerefMut for AsyncResult<T, E> {
 mod test {
     use crate::IntoAsync;
     use crate::{AsyncResult, Err, Ok};
-    use std::num::ParseIntError;
 
     #[tokio::test]
     async fn is_ok() {
@@ -1781,10 +1780,10 @@ mod test {
         let k = 21;
 
         let x: AsyncResult<_, &str> = Ok("foo");
-        assert_eq!(x.map_or_else(|e| k * 2, |v| v.len()), 3);
+        assert_eq!(x.map_or_else(|_e| k * 2, |v| v.len()), 3);
 
         let x: AsyncResult<&str, _> = Err("bar");
-        assert_eq!(x.map_or_else(|e| k * 2, |v| v.len()), 42);
+        assert_eq!(x.map_or_else(|_e| k * 2, |v| v.len()), 42);
     }
 
     #[tokio::test]

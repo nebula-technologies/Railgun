@@ -41,7 +41,7 @@ impl<T, E> Merge<T, E> for Result<T, E> {
     /// v.merge(w, |var_v, var_w| func_xyz(var_v, var_w)).ok();
     /// ```
     #[inline]
-    fn   merge<T1, U, F: FnOnce(T, T1) -> Result<U, E>>(
+    fn merge<T1, U, F: FnOnce(T, T1) -> Result<U, E>>(
         self,
         res1: Result<T1, E>,
         op: F,
@@ -68,7 +68,7 @@ impl<T, E> Merge<T, E> for Result<T, E> {
     /// v.merge2(w, x, |var_v, var_w, var_x| func_xyz(var_v, var_w, var_x)).ok();
     /// ```
     #[inline]
-    fn   merge2<T1, T2, U, F: FnOnce(T, T1, T2) -> Result<U, E>>(
+    fn merge2<T1, T2, U, F: FnOnce(T, T1, T2) -> Result<U, E>>(
         self,
         res1: Result<T1, E>,
         res2: Result<T2, E>,
@@ -92,7 +92,7 @@ impl<T, E> Merge<T, E> for Result<T, E> {
     /// v.merge3(w, x, y, |var_v, var_w, var_x, var_y| func_xyz(var_v, var_w, var_x, var_y)).ok();
     /// ```
     #[inline]
-    fn   merge3<T1, T2, T3, U, F: FnOnce(T, T1, T2, T3) -> Result<U, E>>(
+    fn merge3<T1, T2, T3, U, F: FnOnce(T, T1, T2, T3) -> Result<U, E>>(
         self,
         res1: Result<T1, E>,
         res2: Result<T2, E>,
@@ -120,7 +120,7 @@ impl<T, E> Merge<T, E> for Result<T, E> {
     /// v.merge4(w, x, y, z, |var_v, var_w, var_x, var_y, var_z| func_xyz(var_v, var_w, var_x, var_y, var_z)).ok();
     /// ```
     #[inline]
-    fn   merge4<T1, T2, T3, T4, U, F: FnOnce(T, T1, T2, T3, T4) -> Result<U, E>>(
+    fn merge4<T1, T2, T3, T4, U, F: FnOnce(T, T1, T2, T3, T4) -> Result<U, E>>(
         self,
         res1: Result<T1, E>,
         res2: Result<T2, E>,

@@ -1138,10 +1138,10 @@ mod test {
         let k = 21;
 
         let x = async { Ok("foo") as Result<&str, &str> };
-        assert_eq!(x.map_or_else(|e| k * 2, |v| v.len()), 3);
+        assert_eq!(x.map_or_else(|_e| k * 2, |v| v.len()), 3);
 
         let x = async { Err("bar") as Result<&str, &str> };
-        assert_eq!(x.map_or_else(|e| k * 2, |v| v.len()), 42);
+        assert_eq!(x.map_or_else(|_e| k * 2, |v| v.len()), 42);
     }
 
     #[tokio::test(flavor = "multi_thread")]

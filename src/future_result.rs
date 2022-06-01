@@ -324,7 +324,7 @@ where
     /// # }
     /// ```
     #[inline]
-    fn   unwrap_or_else<'a, TO, F>(self, op: F) -> Pin<Box<dyn Future<Output = T> + Send + 'a>>
+    fn unwrap_or_else<'a, TO, F>(self, op: F) -> Pin<Box<dyn Future<Output = T> + Send + 'a>>
     where
         Self: 'a,
         TO: Future<Output = T> + Send,
@@ -367,7 +367,7 @@ where
     /// # }
     /// ```
     #[inline]
-    fn   merge<'a, T1, U, FO, F>(
+    fn merge<'a, T1, U, FO, F>(
         self,
         res1: Result<T1, E>,
         op: F,
@@ -409,7 +409,7 @@ where
     /// # }
     /// ```
     #[inline]
-    fn   merge2<'a, T1, T2, U, FO, F>(
+    fn merge2<'a, T1, T2, U, FO, F>(
         self,
         res1: Result<T1, E>,
         res2: Result<T2, E>,
@@ -456,7 +456,7 @@ where
     /// # }
     /// ```
     #[inline]
-    fn   merge3<'a, T1, T2, T3, U, FO, F>(
+    fn merge3<'a, T1, T2, T3, U, FO, F>(
         self,
         res1: Result<T1, E>,
         res2: Result<T2, E>,
@@ -507,7 +507,7 @@ where
     /// # }
     /// ```
     #[inline]
-    fn   merge4<'a, T1, T2, T3, T4, U, FO, F>(
+    fn merge4<'a, T1, T2, T3, T4, U, FO, F>(
         self,
         res1: Result<T1, E>,
         res2: Result<T2, E>,
