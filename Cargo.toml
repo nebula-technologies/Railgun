@@ -1,6 +1,6 @@
 [package]
 name = "railsgun"
-version = "1.0.4"
+version = "2.0.0"
 authors = ["Anders Blenstrup-Pedersen <abp-git@ryuu.technology>"]
 edition = "2018"
 description = "Excessive tooling for Result handling - If you want rails you got RAILS!"
@@ -10,8 +10,14 @@ keywords = ["async", "railway", "rails", "result-ext"]
 license = "MIT"
 repository = "https://github.com/nebula-technologies/Railgun"
 
-[dependencies]
-async-trait = "0.1.51"
+[features]
+default = ["rail-merge", "rail-tap", "railsgun-deprecated", "future-result", "option-extended", "map-iter"]
+rail-merge = []
+rail-tap = []
+railsgun-deprecated = []
+future-result = []
+option-extended = []
+map-iter = []
 
 [dependencies.tokio]
 version = "1.12.0"

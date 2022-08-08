@@ -538,14 +538,14 @@ where
     }
 }
 
-pub trait AsFutureResult<T, E> {
-    fn as_async_result<'a>(self) -> Pin<Box<dyn Future<Output = Result<T, E>> + Send + 'a>>
+pub trait IntoFuture {
+    fn into_future<'a>(self) -> Pin<Box<dyn Future<Output = Self> + Send + 'a>>
     where
         Self: 'a;
 }
 
-impl<T: Send, E: Send> AsFutureResult<T, E> for Result<T, E> {
-    fn as_async_result<'a>(self) -> Pin<Box<dyn Future<Output = Result<T, E>> + Send + 'a>>
+impl<T: Send, E: Send> IntoFuture for Result<T, E> {
+    fn into_future<'a>(self) -> Pin<Box<dyn Future<Output = Self> + Send + 'a>>
     where
         Self: 'a,
     {
@@ -556,7 +556,7 @@ impl<T: Send, E: Send> AsFutureResult<T, E> for Result<T, E> {
 #[cfg(test)]
 mod test {
     use super::FutureResult;
-    use crate::future_result::AsFutureResult;
+    use super::IntoFuture;
 
     #[tokio::test]
     async fn test_map() {
@@ -734,7 +734,7 @@ mod test {
 
         assert_eq!(
             func_xyz(3, 3)
-                .as_async_result()
+                .into_future()
                 .map(|t| async move { t + 3 })
                 .await
                 .unwrap(),
@@ -756,7 +756,7 @@ mod test {
 
         assert_eq!(
             func_xyz()
-                .as_async_result()
+                .into_future()
                 .map(|t| async move { t.foo })
                 .await
                 .unwrap(),

@@ -13,8 +13,8 @@
 //! This crate supplies you with some extra missing tools and simplifications
 //! as follows:
 //!
-//! ## tap, tap_err, tap_ref, tap_err_ref
-//! This is an excellent little trait that adds the ability to "tap" the contents.
+//! ## rail-tap, tap_err, tap_ref, tap_err_ref
+//! This is an excellent little trait that adds the ability to "rail-tap" the contents.
 //! This means that you can get a copy/clone of the original content that
 //! you can use for analysis or other destructive operations without
 //! actually touching the original.
@@ -129,7 +129,7 @@
 //! There is a significant need for more documentation on the trait and others
 //! as this library has been in my private stack for a long time and did get the
 //! doc-care it needed.
-//! 1. tap needs doc
+//! 1. rail-tap needs doc
 //! 2. merge needs doc
 //! 3. Implement `BlockInPlace` for `AsyncResult`
 //! 4. More unit tests are needed.
@@ -164,18 +164,37 @@
 //! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #[macro_use]
 extern crate tokio;
-mod async_future_result;
-mod async_result;
-mod block_in_place_result;
-mod future_result;
-mod map_iterator;
-mod merge;
-mod tap;
+#[cfg(feature = "rail-merge")]
+pub mod rail_merge;
+#[cfg(feature = "rail-tap")]
+pub mod rail_tap;
+#[cfg(feature = "railsgun-deprecated")]
+pub mod railsgun_deprecated;
+pub mod futures;
+#[cfg(feature = "option-extended")]
+pub mod option_extended;
+pub mod iterators;
 
-pub use async_future_result::AsyncFutureResult;
-pub use async_result::{AsyncResult, Err, IntoAsync, IntoSync, Ok};
-pub use block_in_place_result::BlockInPlaceResult;
-pub use future_result::{AsFutureResult, FutureResult};
-pub use map_iterator::ResultMapIterator;
-pub use merge::Merge;
-pub use tap::{Tap, TapErr, TapErrRef, TapRef, ThreadTap, ThreadTapErr};
+
+#[cfg(feature = "railsgun-deprecated")]
+pub use railsgun_deprecated::async_future_result::AsyncFutureResult;
+#[cfg(feature = "railsgun-deprecated")]
+pub use railsgun_deprecated::async_result::{AsyncResult, Err, IntoAsync, IntoSync, Ok};
+#[cfg(feature = "railsgun-deprecated")]
+pub use railsgun_deprecated::block_in_place_result::BlockInPlaceResult;
+
+
+#[cfg(feature = "future-result")]
+pub use futures::future_result::{IntoFuture, FutureResult};
+
+#[cfg(feature = "map-iter")]
+pub use iterators::map_iterator::ResultMapIterator;
+
+#[cfg(feature = "rail-merge")]
+pub use rail_merge::Merge;
+
+#[cfg(feature = "rail-tap")]
+pub use rail_tap::{Tap, TapErr, TapErrRef, TapRef, ThreadTap, ThreadTapErr};
+
+#[cfg(feature = "option-extended")]
+pub use option_extended::{OptionsExtended, IntoOption};
