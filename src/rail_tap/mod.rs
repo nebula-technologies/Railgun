@@ -3,28 +3,28 @@ use std::marker::Send;
 use std::thread;
 
 pub trait TapRef<T, E> {
-    fn tap_ref<F: FnOnce(&T)>(self, op: F) -> Result<T, E>;
+    fn tap_ref<F: FnOnce(&T)>(self, op: F) -> Self;
 }
 
 pub trait Tap<T, E> {
-    fn tap<F: FnOnce(T)>(self, op: F) -> Result<T, E>;
+    fn tap<F: FnOnce(T)>(self, op: F) -> Self;
 }
 pub trait TapClone<T, E> {
-    fn tap<F: FnOnce(T)>(self, op: F) -> Result<T, E>;
+    fn tap<F: FnOnce(T)>(self, op: F) -> Self;
 }
 
 pub trait TapErr<T, E> {
-    fn tap_err<F: FnOnce(E)>(self, op: F) -> Result<T, E>;
+    fn tap_err<F: FnOnce(E)>(self, op: F) -> Self;
 }
 pub trait TapErrRef<T, E> {
-    fn tap_err_ref<F: FnOnce(&E)>(self, op: F) -> Result<T, E>;
+    fn tap_err_ref<F: FnOnce(&E)>(self, op: F) -> Self;
 }
 
 pub trait ThreadTap<T, E> {
-    fn thread_tap<F: 'static + FnOnce(T) + Send>(self, op: F) -> Result<T, E>;
+    fn thread_tap<F: 'static + FnOnce(T) + Send>(self, op: F) -> Self;
 }
 pub trait ThreadTapErr<T, E> {
-    fn thread_tap_err<F: 'static + FnOnce(E) + Send>(self, op: F) -> Result<T, E>;
+    fn thread_tap_err<F: 'static + FnOnce(E) + Send>(self, op: F) -> Self;
 }
 
 impl<T, E> TapRef<T, E> for Result<T, E> {
@@ -89,6 +89,75 @@ impl<T, E: 'static + Clone + Send> ThreadTapErr<T, E> for Result<T, E> {
                 let new_err = err.clone();
                 thread::spawn(move || op(new_err));
                 Err(err)
+            }
+            _ => self,
+        }
+    }
+}
+
+
+
+impl<T, E> TapRef<T, E> for Option<T> {
+    #[inline]
+    fn tap_ref<F: FnOnce(&T)>(self, op: F) -> Option<T> {
+        if let Some(ref ok) = self {
+            op(ok);
+        }
+        self
+    }
+}
+
+impl<T: Clone, E> TapClone<T, E> for Option<T> {
+    #[inline]
+    fn tap<F: FnOnce(T)>(self, op: F) -> Option<T> {
+        if let Some(ref ok) = self {
+            op(ok.clone());
+        }
+        self
+    }
+}
+
+impl<T: Clone> TapErr<T, Option<T>> for Option<T>{
+    #[inline]
+    fn tap_err<F: FnOnce(Option<T>)>(self, op: F) -> Option<T> {
+        if self.is_none() {
+            op(self.clone());
+        }
+        self
+    }
+}
+
+impl<T> TapErrRef<T, Option<T>> for Option<T> {
+    #[inline]
+    fn tap_err_ref<F: FnOnce(&Option<T>)>(self, op: F) -> Option<T> {
+        if self.is_none() {
+            op(&self);
+        }
+        self
+    }
+}
+
+impl<T: 'static + Clone + Send, E> ThreadTap<T, E> for Option<T> {
+    #[inline]
+    fn thread_tap<'a, F: 'static + FnOnce(T) + Send>(self, op: F) -> Option<T> {
+        match self {
+            Some(some) => {
+                let new_ok = some.clone();
+                thread::spawn(move || op(new_ok));
+                Some(some)
+            }
+            _ => self,
+        }
+    }
+}
+
+impl<T: 'static + Clone + Send> ThreadTapErr<T, Option<T>> for Option<T> {
+    #[inline]
+    fn thread_tap_err<F: 'static + FnOnce(Option<T>) + Send>(self, op: F) -> Option<T> {
+        match self {
+            None => {
+                thread::spawn(move || op(self));
+                None
             }
             _ => self,
         }
