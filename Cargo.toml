@@ -1,6 +1,6 @@
 [package]
 name = "railsgun"
-version = "2.0.1"
+version = "2.0.2"
 authors = ["Anders Blenstrup-Pedersen <abp-git@ryuu.technology>"]
 edition = "2018"
 description = "Excessive tooling for Result handling - If you want rails you got RAILS!"
