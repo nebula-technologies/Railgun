@@ -192,6 +192,8 @@ pub use iterators::map_iterator::ResultMapIterator;
 
 #[cfg(feature = "rail-merge")]
 pub use rail_merge::Merge;
+#[cfg(feature = "rail-merge")]
+pub use rail_merge::MergeOption;
 
 #[cfg(feature = "rail-tap")]
 pub use rail_tap::{Tap, TapErr, TapErrRef, TapRef, ThreadTap, ThreadTapErr};
